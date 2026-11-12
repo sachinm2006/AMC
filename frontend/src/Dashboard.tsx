@@ -421,8 +421,8 @@ function OverviewPage({ onSelect, weather, chartSeries }: { onSelect: (tab: Tab)
 }
 
 function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null; onUpdateApiKey: (key: string) => void }) {
-  const [startDate, setStartDate] = useState('2023-05-01')
-  const [endDate, setEndDate] = useState('2023-05-15')
+  const [startDate, setStartDate] = useState('2026-10-28')
+  const [endDate, setEndDate] = useState('2026-11-12')
   const [loading, setLoading] = useState(false)
   const [customKey, setCustomKey] = useState('')
   const [showKeyInput, setShowKeyInput] = useState(false)
@@ -529,6 +529,8 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
               <input
                 type="date"
                 value={startDate}
+                min="2021-01-08"
+                max="2031-12-31"
                 onChange={(e) => setStartDate(e.target.value)}
                 style={{ border: 'none', background: 'transparent', fontSize: '10.5px', color: '#1e293b', fontWeight: 600 }}
               />
@@ -540,6 +542,8 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
               <input
                 type="date"
                 value={endDate}
+                min="2021-01-08"
+                max="2031-12-31"
                 onChange={(e) => setEndDate(e.target.value)}
                 style={{ border: 'none', background: 'transparent', fontSize: '10.5px', color: '#1e293b', fontWeight: 600 }}
               />
@@ -570,6 +574,24 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
         {/* Quick Presets Strip */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
           <span style={{ fontSize: '9.5px', color: '#64748b', fontWeight: 700 }}>QUICK PRESETS:</span>
+          <button
+            onClick={() => applyPreset('2026-10-28', '2026-11-12')}
+            style={{ padding: '3px 9px', background: '#dcfce7', border: '1.5px solid #16a34a', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#15803d', fontWeight: 700 }}
+          >
+            ⚡ Last 15 Days (Recent Dispatch)
+          </button>
+          <button
+            onClick={() => applyPreset('2026-11-12', '2026-11-26')}
+            style={{ padding: '3px 9px', background: '#dbeafe', border: '1px solid #2563eb', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#1d4ed8', fontWeight: 600 }}
+          >
+            🔮 Next 15 Days (Nov 2026 Forward)
+          </button>
+          <button
+            onClick={() => applyPreset('2026-11-05', '2026-11-12')}
+            style={{ padding: '3px 9px', background: '#e0f2fe', border: '1px solid #0891b2', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#0e7490', fontWeight: 600 }}
+          >
+            📊 Last 7 Days (Hourly)
+          </button>
           <button
             onClick={() => applyPreset('2023-05-01', '2023-05-31')}
             style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '9.5px', cursor: 'pointer', color: '#b45309', fontWeight: 600 }}

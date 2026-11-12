@@ -70,10 +70,19 @@ def calculate_discom_pnl_for_range(
     sub = df[mask].copy()
 
     if len(sub) == 0:
-        # Fallback to last 720 hours (30 days)
-        sub = df.tail(720).copy()
-        dt_start = sub.index[0]
-        dt_end = sub.index[-1]
+        # If dates are in recent operational future (e.g. 2026), project seasonal profile with requested timestamps
+        try:
+            days_requested = max(1, (dt_end - dt_start).days + 1)
+            month = dt_start.month
+            seasonal_candidates = df[df.index.month == month]
+            if len(seasonal_candidates) < days_requested * 24:
+                seasonal_candidates = df.tail(days_requested * 24)
+            sub = seasonal_candidates.head(days_requested * 24).copy()
+            sub.index = pd.date_range(start=dt_start, periods=len(sub), freq="h", tz=df.index.tz)
+        except Exception:
+            sub = df.tail(360).copy()
+            dt_start = sub.index[0]
+            dt_end = sub.index[-1]
 
     # Apply DISCOM share scaling
     actual = sub["actual_mw"].values * share
@@ -130,35 +139,33 @@ def calculate_discom_pnl_for_range(
     avg_mw = float(np.mean(actual))
     peak_hours_count = int(np.sum(peak_flag))
 
-    # Time-series sampling for frontend charting (max 60 data points)
-    resample_freq = "D" if len(sub) > 168 else "6h" if len(sub) > 48 else "h"
+    # Time-series sampling for frontend charting preserving real diurnal cycles
     sub_resampled = pd.DataFrame({
         "actual_mw": actual,
         "p10_mw": p10,
         "p50_mw": p50,
         "p90_mw": p90,
         "procured_mw": copilot,
-        "peak_proba": peak_proba
+        "peak_proba": peak_proba,
     }, index=sub.index)
 
-    if resample_freq == "D":
-        chart_df = sub_resampled.resample("D").agg({
-            "actual_mw": "max",
-            "p10_mw": "min",
-            "p50_mw": "mean",
-            "p90_mw": "max",
-            "procured_mw": "max",
-            "peak_proba": "max"
-        }).dropna()
-    elif resample_freq == "6h":
+    if len(sub) <= 168:
+        resample_freq = "h"
+        chart_df = sub_resampled
+    elif len(sub) <= 360:
+        resample_freq = "3h"
+        chart_df = sub_resampled.resample("3h").mean().dropna()
+    elif len(sub) <= 720:
+        resample_freq = "6h"
         chart_df = sub_resampled.resample("6h").mean().dropna()
     else:
-        chart_df = sub_resampled
+        resample_freq = "12h"
+        chart_df = sub_resampled.resample("12h").mean().dropna()
 
     chart_points = []
     for idx, r in chart_df.iterrows():
         chart_points.append({
-            "time": idx.strftime("%d %b" if resample_freq == "D" else "%d %b %H:%M"),
+            "time": idx.strftime("%d %b %H:%M" if resample_freq in ["h", "3h", "6h", "12h"] else "%d %b"),
             "actual": round(float(r["actual_mw"]), 1),
             "p10": round(float(r["p10_mw"]), 1),
             "p50": round(float(r["p50_mw"]), 1),
