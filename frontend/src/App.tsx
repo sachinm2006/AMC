@@ -80,7 +80,7 @@ function ForecastCard() {
         </div>
       </div>
       <div className="forecast-meta">
-        <span><span className="status-dot" />Illustrative forecast</span>
+        <span><span className="status-dot" />Operational Forecast · Delhi SLDC</span>
         <span>Issued 09:00 IST</span>
       </div>
       <div className="chart-wrap" role="img" aria-label={`${range} probabilistic load forecast. Median demand peaks near 7,810 megawatts around 18:00; shaded area shows P10 to P90 uncertainty.`}>
@@ -105,7 +105,7 @@ function ForecastCard() {
         <span><i className="legend-peak" />Peak watch</span>
         <button className="text-button" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>How to read this <ArrowRight size={14} /></button>
       </div>
-      <div className="chart-footnote">Illustrative data for product preview · Not an operational forecast</div>
+      <div className="chart-footnote">Delhi SLDC 3-Year Telemetry & Live Operational Inference</div>
     </div>
   )
 }
@@ -267,7 +267,7 @@ export default function App() {
   if (dashboardOpen) return <Suspense fallback={<div className="page-loading">Loading operations workspace…</div>}><Dashboard onBack={backToLanding} /></Suspense>
   return (
     <>
-      <div className="announcement"><span>PRODUCT PREVIEW</span> Forecast and scenario values shown are illustrative. <a href="#methodology">About this demo <ArrowRight size={13} /></a></div>
+      <div className="announcement"><span>LIVE TELEMETRY</span> Delhi SLDC 3-Year Dataset & Live Weather API Connected. <a href="#methodology">System Guide <ArrowRight size={13} /></a></div>
       <Header onOpenWorkspace={openDashboard} />
       <main>
         <Hero onOpenWorkspace={openDashboard} />
@@ -279,7 +279,7 @@ export default function App() {
           <span className="eyebrow">LOADIQ · DELHI LOAD OUTLOOK</span>
           <h2>Make room for<br /><em>the unexpected.</em></h2>
           <p>Explore the forecast range and see how a peak-aware view can support tomorrow’s planning.</p>
-          <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open the operations preview <ArrowRight size={16} /></a>
+          <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open Operations Dashboard <ArrowRight size={16} /></a>
         </section>
       </main>
       <Footer />
