@@ -1,144 +1,157 @@
-# 🔋 Delhi DISCOM — Probabilistic Peak-Aware Load Forecasting & Procurement Copilot
+# 🔋 Delhi DISCOM -- Probabilistic Peak-Aware Load Forecasting & Procurement Copilot
 
-> **CodeSpark 2026** · Domain 4, PS 2 · AMC Engineering College, Dept. of CSE - Data Science
+> **CodeSpark 2026** · Domain 4, PS 2 · AMC Engineering College, Dept. of CSE - Data Science  
+> **Team Lead / ML Lead:** Varun Kumar
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF)](https://vitejs.dev)
 [![LightGBM](https://img.shields.io/badge/LightGBM-Quantile-brightgreen)](https://lightgbm.readthedocs.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 🎯 Problem Statement
+## 🎯 Executive Problem Statement & Commercial Impact
 
-Delhi DISCOM manages an extreme load swing — from **2,000 MW in winter** to **8,300 MW in peak summer**. Under-procuring power during a 45°C heatwave forces real-time Deviation Settlement Mechanism (DSM) purchases at **3.5× base tariff**. Over-procurement wastes 1× capacity charges.
+Delhi DISCOM manages one of the most volatile electricity grids in India -- swinging from **2,000 MW in winter** to an all-time record of **8,656 MW in peak summer**. 
 
-This system predicts **P10/P50/P90 probabilistic load bands** 24–168 hours ahead and auto-generates an asymmetric procurement schedule that minimizes total expected ₹ cost.
+Power purchase accounts for **75% to 80% (Rs. 25,000 to Rs. 30,000 Crore)** of total annual expenditure. Under **DERC (Delhi Electricity Regulatory Commission) regulations**, power purchase costs are passed through via consumer surcharges (FPPAS), **BUT avoidable Deviation Settlement Mechanism (DSM) penalties caused by scheduling errors are strictly DISALLOWED in annual true-ups**. DSM penalties directly destroy operating profit and shareholder equity.
 
----
+Under **CERC DSM 2024 regulations**, under-procuring power during a severe heatwave incurs emergency Real-Time Market (RTM) charges up to Rs. 10/unit plus frequency penalty multipliers reaching **150% to 200% (Rs. 12 to Rs. 15/unit, a 3.5x penalty multiple)**. Over-procurement wastes 1.0x capacity fixed charges.
 
-## 🏗️ Architecture
-
-```
-Raw Delhi SLDC Data
-        │
-        ▼
-┌───────────────────────┐
-│  Module 1: Preprocessing │  ← Imputation, outlier clipping, continuous index
-└───────────┬───────────┘
-            │
-            ▼
-┌───────────────────────────────┐
-│  Module 2: Feature Engineering │  ← CDH, thermal inertia, festival flags, lags
-└───────────┬───────────────────┘
-            │
-            ▼
-┌───────────────────────────────────────────┐
-│  Module 3: Quantile Forecaster             │  ← LightGBM P10/P50/P90, XGBoost ensemble
-│  Module 4: Peak-Event Classifier           │  ← Binary LightGBM (Recall > 85%)
-│  Module 5: Walk-Forward Backtest (52 wins) │  ← Zero data leakage
-└───────────┬───────────────────────────────┘
-            │
-            ▼
-┌──────────────────────────────┐
-│  Module 6: Procurement Advisor│  ← Asymmetric DSM cost optimizer
-│  Module 7: Dashboard (Plotly) │  ← P10/P50/P90 bands + shock simulator
-└──────────────────────────────┘
-```
+### Key Performance Benchmarks (52-Window Rolling-Origin Backtest)
+* **Day-Ahead P50 Pooled MAPE:** **4.18%** (vs 7.18% Seasonal-Naïve and 5.86% Yesterday-Naïve -- a **41.8% error reduction**).
+* **Peak Hours Recall:** **96.9%** with **85.1% Precision** ($F_1 = 0.906$) at asymmetric cost threshold $p^* = 0.222$.
+* **Conformal Coverage (CQR PICP):** **81.1%** empirical confidence coverage (surpassing the 80% regulatory threshold).
+* **Net P&L Savings:** Avoids **Rs. 206.66 Crore** in catastrophic unhedged DSM penalties across 8,736 operating hours.
 
 ---
 
-## 📁 Repository Structure
+## 🏗️ Clean Modular Repository Architecture
 
 ```
-├── data/
-│   ├── raw/                        ← Raw SLDC CSV / synthetic data
-│   ├── generate_synthetic_data.py  ← Synthetic Delhi data generator
-│   ├── clean_delhi_load.parquet    ← Cleaned output (auto-generated)
-│   └── feature_matrix.parquet      ← Feature matrix (auto-generated)
-├── src/
-│   ├── preprocessing.py            ← Module 1: Data cleaning pipeline
-│   ├── feature_engineering.py      ← Module 2: Feature builder
-│   ├── train_models.py             ← Module 3 & 4: Quantile models + classifier
-│   ├── backtest.py                 ← Module 5: Walk-forward evaluation
-│   ├── procurement.py              ← Module 6: Asymmetric cost advisor
-│   └── dashboard.py                ← Module 7: Plotly dashboard
-├── models/                         ← Trained model pickles (auto-generated)
-├── outputs/                        ← Predictions, metrics, plots (auto-generated)
-├── run_phase1.py                   ← ✅ PHASE 1 runner (data + features)
-├── run_phase2.py                   ← PHASE 2 runner (models + backtest)
-├── run_all.py                      ← Full pipeline runner
-├── requirements.txt
-└── MODEL_CARD.md
+Probabilistic-Peak-Aware-Load-Forecasting-Procurement-Copilot/
+├── backend/                  # FastAPI REST API & Copilot Decision Engine
+│   ├── main.py               # 13 REST API endpoints (forecast, peaks, copilot, risk)
+│   ├── copilot.py            # Natural language dispatch desk risk insights
+│   ├── peak_analytics.py     # Extreme event distribution analytics
+│   ├── metrics.py            # MAE, RMSE, MAPE evaluation metrics
+│   └── procurement.py        # Asymmetric procurement financial simulator
+│
+├── frontend/                 # Peakwise React 19 + TypeScript + Vite Dashboard
+│   ├── src/                  # App.tsx, Dashboard.tsx, Tailwind & Recharts components
+│   ├── package.json          # Node dependencies (React 19, Lucide, Recharts)
+│   └── vite.config.ts        # Vite configuration
+│
+├── models/                   # Serialized Production ML Models
+│   ├── lgbm_q10_h24.pkl      # Day-ahead 10th percentile quantile regressor
+│   ├── lgbm_q50_h24.pkl      # Day-ahead 50th percentile (median) regressor
+│   ├── lgbm_q90_h24.pkl      # Day-ahead 90th percentile quantile regressor
+│   ├── lgbm_q10_h168.pkl     # Week-ahead 10th percentile regressor
+│   ├── lgbm_q50_h168.pkl     # Week-ahead 50th percentile regressor
+│   ├── lgbm_q90_h168.pkl     # Week-ahead 90th percentile regressor
+│   ├── lgbm_peak_classifier.pkl # Binary peak classifier (96.9% Recall)
+│   ├── ridge_h24.pkl         # Linear L2 benchmark model
+│   └── MODEL_CARD.md         # Production model card & performance specifications
+│
+├── data/                     # Data Pipeline & Feature Store
+│   ├── raw/                  # Raw SLDC load & weather inputs
+│   ├── clean_delhi_load.parquet # 3-year cleaned hourly load series
+│   ├── feature_matrix.parquet # 47 domain features (26,112 rows x 53 cols)
+│   └── generate_synthetic_data.py # Synthetic data generation engine
+│
+├── src/                      # Core ML Pipelines & Conformal Inference
+│   ├── preprocessing.py      # Outlier clipping & missing value imputation
+│   ├── feature_engineering.py # 47 features (thermal inertia, CDH, heatwave onset)
+│   ├── train_models.py       # Multi-horizon quantile LightGBM training
+│   ├── backtest.py           # 52-window rolling-origin walk-forward CQR backtest
+│   ├── error_diagnostics.py  # SHAP values, heatwave onset & missed peak analysis
+│   └── procurement.py        # Financial loss function & procurement optimizer
+│
+├── outputs/                  # Backtest Artifacts & Visualizations
+│   ├── backtest_summary.csv  # 52-fold pooled backtest metrics
+│   ├── rupee_procurement_impact.csv # Rs. 206.66 Cr savings financial matrix
+│   ├── error_heatmap.png     # Hour-of-day vs month error density heatmap
+│   ├── shap_summary.png      # SHAP feature importance impact
+│   └── heatwave_onset_analysis.png # Heatwave onset buffer response curve
+│
+├── docs/                     # Executive Reports & Presentation Guides
+│   ├── Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf # 5-Page P&L & 10-Slide Deck Guide
+│   ├── Delhi_DISCOM_Project_Master_Technical_Report.pdf # 5-Page Technical ML Dossier
+│   └── ui-ux-plan.md         # UI/UX design specifications
+│
+├── run_local.py              # Unified localhost launcher (Backend + Frontend)
+├── run_phase1.py             # Phase 1 data cleaning & feature generation runner
+├── run_phase2.py             # Phase 2 model training & evaluation runner
+├── requirements.txt          # Python dependencies
+└── README.md
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 How to Run on Localhost
 
-### 1. Install dependencies
+### 1. Unified Launcher (Runs Both Backend & Frontend)
 ```bash
+# Clone the repository
+git clone https://github.com/sachinm2006/Probabilistic-Peak-Aware-Load-Forecasting-Procurement-Copilot.git
+cd Probabilistic-Peak-Aware-Load-Forecasting-Procurement-Copilot
+
+# Install Python requirements
 pip install -r requirements.txt
-```
 
-### 2. Run Phase 1 — Data Pipeline (using synthetic data)
+# Start both servers together
+python run_local.py
+```
+* **FastAPI Backend:** [http://localhost:8000](http://localhost:8000)
+* **Swagger API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
+* **React Dashboard UI:** [http://localhost:5173](http://localhost:5173)
+
+---
+
+### 2. Running Services Individually
+
+#### Option A: Run FastAPI Backend Only
 ```bash
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
+Test endpoints:
+* Root health check: `GET http://127.0.0.1:8000/`
+* Latest 24h forecast bands: `GET http://127.0.0.1:8000/api/forecast`
+* Peak alert status: `GET http://127.0.0.1:8000/api/peaks`
+* Copilot natural language insights: `GET http://127.0.0.1:8000/api/copilot`
+* Asymmetric procurement comparison: `GET http://127.0.0.1:8000/api/procurement/comparison`
+
+#### Option B: Run React Frontend Only
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in any browser.
+
+---
+
+## 📊 ML Pipeline Reproduction
+
+```bash
+# Phase 1: Build 47 domain features from raw SLDC load
 python run_phase1.py
-```
 
-### 2b. Run Phase 1 with real SLDC data
-```bash
-python run_phase1.py --real path/to/delhi_sldc_hourly.csv
-```
-
-### 3. Run Phase 2 — Train Models + Backtest
-```bash
+# Phase 2: Train multi-horizon LightGBM quantiles & peak classifier
 python run_phase2.py
+
+# Run 52-window rolling-origin walk-forward backtest with Regime CQR
+python src/backtest.py
+
+# Generate SHAP explainability & diagnostic heatmaps
+python src/error_diagnostics.py
 ```
 
-### 4. Launch Dashboard
-```bash
-python src/dashboard.py
-```
-
 ---
 
-## 📊 Key Metrics (Targets)
-
-| Metric | Target |
-|--------|--------|
-| MAPE (P50 day-ahead) | < 5% vs. Seasonal-Naïve baseline |
-| PICP (P10–P90 coverage) | ≈ 80% |
-| Peak Timing Error | < 30 minutes average |
-| Peak Magnitude Error | < 3% of peak MW |
-| **Peak Recall** | **> 85% on top-decile events** |
-| Pinball Loss | Minimized across P10/P50/P90 |
-
----
-
-## 🧮 Asymmetric Procurement Formula
-
-$$\text{Total Cost} = \sum \left[ \underbrace{U \times 3.5 \times T}_{\text{Under-procurement DSM}} + \underbrace{O \times 1.0 \times T}_{\text{Over-procurement waste}} \right]$$
-
-Where *U* = under-procurement MW, *O* = over-procurement MW, *T* = base tariff (₹/MWh).
-
-**Operating at P90 minimizes total expected financial loss.**
-
----
-
-## 👥 Team
-
-| Member | Role |
-|--------|------|
-| **Varun Kumar** | ML & Data Pipeline Lead |
-| **Akshitha** | Backend API & Financial Logic Lead |
-| **Member 3** | Frontend Dashboard & Pitch Lead |
-
----
-
-## 🏆 Judge Alignment (Flipkart Minutes Persona)
-
-Frame grid under-procurement as **dark-store inventory stockouts** and P90 tail-risk buffers as **safety-stock protection** during demand surge peaks. The asymmetric DSM penalty mirrors quick-commerce's asymmetric spoilage vs. stockout cost function.
-
----
-
-*CodeSpark 2026 Hackathon · Department of CSE - Data Science · AMC Engineering College*
+## 📑 Master Documentation & Pitch Kit
+All comprehensive documentation has been compiled into standalone, publication-grade PDFs in `docs/`:
+1. **[Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf](docs/Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf)**: Complete P&L financial analysis, 10-slide ready-to-present PPT deck, and rapid-fire judge defense cheat sheet.
+2. **[Delhi_DISCOM_Project_Master_Technical_Report.pdf](docs/Delhi_DISCOM_Project_Master_Technical_Report.pdf)**: 5-page master technical dossier covering feature engineering, quantile LightGBM math, regime-conditioned CQR, and 52-window walk-forward validation.

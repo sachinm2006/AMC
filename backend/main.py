@@ -1,23 +1,31 @@
-from fastapi.middleware.cors import CORSMiddleware
-from copilot import generate_insights
-
 import sys
 from pathlib import Path
-
 import pandas as pd
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Backend modules
-from metrics import calculate_metrics
-from procurement import calculate_procurement
-from peak_analytics import analyze_peaks
+# Robust path resolution: Works from repo root or backend/ directory
+BACKEND_DIR = Path(__file__).resolve().parent
+REPO_ROOT = BACKEND_DIR.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-# ML pipeline & Repository root resolution
-BASE_DIR = Path(__file__).resolve().parent.parent
-REPO_ROOT = BASE_DIR if (BASE_DIR / "src").exists() else (BASE_DIR / "ml-pipeline")
-sys.path.insert(0, str(REPO_ROOT))
+# Backend local helper modules
+try:
+    from backend.copilot import generate_insights
+    from backend.metrics import calculate_metrics
+    from backend.procurement import calculate_procurement
+    from backend.peak_analytics import analyze_peaks
+except ImportError:
+    from copilot import generate_insights
+    from metrics import calculate_metrics
+    from procurement import calculate_procurement
+    from peak_analytics import analyze_peaks
 
+# ML pipeline modules
 from src.procurement import (
     calculate_procurement_loss,
     simulate_procurement_comparison
@@ -25,6 +33,8 @@ from src.procurement import (
 
 # Load prediction dataset
 DATA_PATH = REPO_ROOT / "outputs" / "predictions_with_bands.csv"
+if not DATA_PATH.exists():
+    raise FileNotFoundError(f"Predictions dataset not found at {DATA_PATH}. Run Phase 2 pipeline first.")
 df = pd.read_csv(DATA_PATH, index_col=0)
 
 app = FastAPI(
@@ -32,20 +42,30 @@ app = FastAPI(
     description="Electricity Load Forecasting and Procurement Copilot",
     version="1.0.0"
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def home():
-    return {"message": "Delhi DISCOM Backend is running!", "status": "online"}
+    return {
+        "message": "Delhi DISCOM Procurement Copilot Backend is running!",
+        "status": "online",
+        "version": "1.0.0",
+        "records_loaded": len(df)
+    }
 
 
 @app.get("/api/forecast")
@@ -125,6 +145,7 @@ def procurement_risk():
         "P50": calculate_procurement_loss(actual, p50),
         "P90": calculate_procurement_loss(actual, p90)
     }
+
 
 @app.get("/api/copilot")
 def copilot():

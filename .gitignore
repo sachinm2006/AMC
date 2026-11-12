@@ -15,7 +15,13 @@ build/
 env/
 venv/
 
-# Data & outputs (large files — push only sample/synthetic)
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Data & outputs (large files -- push only sample/synthetic)
 data/raw/*.csv
 data/clean_delhi_load.parquet
 data/feature_matrix.parquet
