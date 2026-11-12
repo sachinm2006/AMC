@@ -1,4 +1,4 @@
 Strategy,Under-procured_MWh,DSM_Penalty_₹_Lakhs,Capacity_Surplus_Waste_₹_Lakhs,Total_Penalty_Loss_₹_Lakhs,Net_₹_Saved_vs_P50
-P50 Point Forecast (Traditional),180344.8,28404.3,21907.78,50312.08,₹0.00
-P90 Tail-Risk Buffer (Continuous),42803.7,6741.58,46034.29,52775.88,₹-2463.79 Lakhs
-Cost-Threshold Dynamic Policy (p >= 0.222),180344.8,28404.3,21907.78,50312.08,₹0.00 Lakhs
+P50 Point Forecast (Traditional),181398.8,28570.32,21177.04,49747.36,₹0.00
+P90 Tail-Risk Buffer (Continuous),50186.9,7904.43,43837.44,51741.87,₹-1994.51 Lakhs
+Cost-Threshold Dynamic Policy (p >= 0.222),181398.8,28570.32,21177.04,49747.36,₹0.00 Lakhs

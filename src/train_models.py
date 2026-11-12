@@ -29,26 +29,7 @@ from sklearn.metrics import (
     mean_absolute_percentage_error, mean_squared_error,
     precision_score, recall_score, f1_score, classification_report
 )
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Config
-# ─────────────────────────────────────────────────────────────────────────────
-FEATURE_COLS = [
-    "CDH", "heat_index",
-    "rolling_temp_24h", "rolling_temp_48h", "rolling_temp_72h",
-    "temp_delta_24h",
-    "hour_sin", "hour_cos", "dow_sin", "dow_cos",
-    "month_sin", "month_cos", "doy_sin", "doy_cos",
-    "hour", "day_of_week", "month", "is_weekend",
-    "is_diwali", "is_eid", "is_holi",
-    "is_republic_day", "is_independence", "is_christmas",
-    "is_major_festival", "odd_even_flag", "lockdown_flag",
-    "load_lag_24h", "load_lag_48h", "load_lag_168h",
-    "load_rolling_mean_24h", "load_rolling_mean_48h",
-    "load_delta_1h", "load_delta_24h",
-    "trend_years",
-    "temp_c", "humidity",
-]
+from feature_engineering import FEATURE_COLS
 
 QUANTILES     = [0.10, 0.50, 0.90]
 HORIZONS      = [24, 168]           # hours ahead
@@ -180,42 +161,41 @@ def picp(y_true, y_p10, y_p90) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 def train_peak_classifier(
     X_train, y_peak_train, X_val, y_peak_val
-) -> lgb.LGBMClassifier:
+) -> tuple:
     """
     Binary LightGBM classifier: predict whether hour will be in top-decile peak.
-    Optimised for Recall (we do NOT want to miss a peak event).
+    Optimised for Recall (asymmetric risk: under-procurement penalty = 3.5x).
     """
+    if y_peak_val.sum() == 0:
+        # Validation slice has no peaks (e.g. autumn/winter period).
+        # Use chronological summer split from X_train for validation.
+        split_pt = int(len(X_train) * 0.80)
+        X_tr_fit, y_tr_fit = X_train.iloc[:split_pt], y_peak_train.iloc[:split_pt]
+        X_eval,   y_eval   = X_train.iloc[split_pt:], y_peak_train.iloc[split_pt:]
+    else:
+        X_tr_fit, y_tr_fit = X_train, y_peak_train
+        X_eval,   y_eval   = X_val,   y_peak_val
+
     clf = lgb.LGBMClassifier(**LGBM_CLF_PARAMS)
     clf.fit(
-        X_train, y_peak_train,
-        eval_set=[(X_val, y_peak_val)],
+        X_tr_fit, y_tr_fit,
+        eval_set=[(X_eval, y_eval)],
         callbacks=[lgb.early_stopping(50, verbose=False), lgb.log_evaluation(-1)]
     )
 
-    proba = clf.predict_proba(X_val)[:, 1]
-    # Find threshold maximising Recall >= 0.85
-    best_thresh = 0.5
-    best_recall = 0.0
-    for t in np.arange(0.2, 0.8, 0.02):
-        preds_t = (proba >= t).astype(int)
-        if y_peak_val.sum() == 0:
-            continue
-        r = recall_score(y_peak_val, preds_t, zero_division=0)
-        if r >= 0.85 and r > best_recall:
-            best_recall = r
-            best_thresh = t
+    proba = clf.predict_proba(X_eval)[:, 1]
+    cost_optimal_thresh = 1.0 / (1.0 + 3.5)  # ~0.2222
+    
+    # Evaluate recall & precision at cost-derived threshold
+    final_preds = (proba >= cost_optimal_thresh).astype(int)
+    prec = precision_score(y_eval, final_preds, zero_division=0)
+    rec  = recall_score(y_eval, final_preds, zero_division=0)
+    f1   = f1_score(y_eval, final_preds, zero_division=0)
 
-    final_preds = (proba >= best_thresh).astype(int)
-    prec = precision_score(y_peak_val, final_preds, zero_division=0)
-    rec  = recall_score(y_peak_val, final_preds, zero_division=0)
-    f1   = f1_score(y_peak_val, final_preds, zero_division=0)
-
-    print(f"  Peak Classifier (thresh={best_thresh:.2f}): "
+    print(f"  Peak Classifier (eval_set, thresh={cost_optimal_thresh:.3f}): "
           f"Precision={prec:.3f}  Recall={rec:.3f}  F1={f1:.3f}")
-    if rec < 0.85:
-        print(f"  [WARNING] Recall {rec:.3f} < 0.85 target — lower threshold or add features")
 
-    return clf, best_thresh, {"precision": prec, "recall": rec, "f1": f1}
+    return clf, cost_optimal_thresh, {"precision": prec, "recall": rec, "f1": f1}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -321,7 +301,8 @@ def run_training(feature_path: Path = Path("data/feature_matrix.parquet")) -> di
     clf, best_thresh, clf_metrics = train_peak_classifier(
         X_train, y_peak_train, X_val, y_peak_val
     )
-    joblib.dump({"model": clf, "threshold": best_thresh}, MODELS_DIR / "lgbm_peak_classifier.pkl")
+    cost_optimal_thresh = 1.0 / (1.0 + 3.5)
+    joblib.dump({"model": clf, "threshold": cost_optimal_thresh}, MODELS_DIR / "lgbm_peak_classifier.pkl")
     all_metrics["peak_classifier"] = clf_metrics
     all_models["peak_classifier"] = clf
 
@@ -332,14 +313,23 @@ def run_training(feature_path: Path = Path("data/feature_matrix.parquet")) -> di
 
     for horizon in HORIZONS:
         label = f"h{horizon}"
-        for q_label in ["q10", "q50", "q90"]:
-            if label in quantile_preds and q_label in quantile_preds[label]:
-                out_df[f"pred_{q_label}_{label}"] = quantile_preds[label][q_label]
+        p10 = quantile_preds[label]["q10"]
+        p50 = quantile_preds[label]["q50"]
+        p90 = quantile_preds[label]["q90"]
+        # Enforce Monotonicity (P10 <= P50 <= P90)
+        out_df[f"pred_q10_{label}"] = np.minimum(p10, p50)
+        out_df[f"pred_q50_{label}"] = p50
+        out_df[f"pred_q90_{label}"] = np.maximum(p90, p50)
 
-    # Peak classifier predictions
+    # Peak classifier predictions using cost-derived threshold p* = 0.222
     peak_proba = clf.predict_proba(X_val)[:, 1]
+    cost_thresh = 1.0 / (1.0 + 3.5)
+    if "heatwave_onset_flag" in X_val.columns:
+        thresh_vec = np.where(X_val["heatwave_onset_flag"] == 1, 0.18, cost_thresh)
+    else:
+        thresh_vec = cost_thresh
     out_df["pred_peak_proba"]  = peak_proba
-    out_df["pred_peak_flag"]   = (peak_proba >= best_thresh).astype(int)
+    out_df["pred_peak_flag"]   = (peak_proba >= thresh_vec).astype(int)
 
     out_df.to_csv(OUTPUTS_DIR / "predictions_with_bands.csv")
     print(f"  Saved -> outputs/predictions_with_bands.csv ({len(out_df):,} rows)")

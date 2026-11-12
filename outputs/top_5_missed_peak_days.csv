@@ -1,6 +1,6 @@
 Date,Actual_Peak_MW,Pred_P50_MW,Pred_P90_Buffer_MW,Deficit_Under_P90_MW,Max_Temp_C,Festival_Active,Root_Cause
-2023-07-28,4521.0,4155.2,4300.7,444.8,29.4,False,Abrupt residential evening ramp
-2023-07-21,4755.3,4251.7,4462.1,406.0,20.7,False,Abrupt residential evening ramp
-2023-08-04,4260.8,3700.9,3879.2,381.6,24.7,False,Abrupt residential evening ramp
-2023-08-18,3633.7,3370.4,3492.7,364.6,16.1,False,Abrupt residential evening ramp
-2023-12-22,3971.5,3717.4,3821.5,317.5,22.9,False,Abrupt residential evening ramp
+2023-07-28,4521.0,4120.9,4236.5,456.6,29.4,False,Abrupt residential evening ramp
+2023-07-21,4755.3,4231.5,4430.7,438.6,20.7,False,Abrupt residential evening ramp
+2023-08-04,4260.8,3700.6,3851.2,409.7,24.7,False,Abrupt residential evening ramp
+2023-08-18,3633.7,3289.2,3489.0,379.0,16.1,False,Abrupt residential evening ramp
+2023-08-11,3841.4,3482.7,3756.5,361.3,21.2,False,Abrupt residential evening ramp
