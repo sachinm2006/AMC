@@ -1,5 +1,8 @@
 # 🔋 Delhi DISCOM -- Probabilistic Peak-Aware Load Forecasting & Procurement Copilot
 
+> **🌐 Live website:** [Open LoadIQ](https://probabilistic-peak-aware-load-forec.vercel.app/)  
+> **📊 Final presentation:** [Download the watermark-free PPT](docs/LoadIQ_no_Gamma_watermark.pptx)
+
 > **CodeSpark 2026** · Domain 4, PS 2 · AMC Engineering College, Dept. of CSE - Data Science  
 > **Team Lead / ML Lead:** Varun Kumar
 
@@ -92,9 +95,6 @@ Probabilistic-Peak-Aware-Load-Forecasting-Procurement-Copilot/
 
 ## 🚀 How to Run on Localhost
 
-### Live Dashboard Preview
-Explore the deployed LoadIQ product landing page: **[Open the LoadIQ landing page](https://probabilistic-peak-aware-load-forec.vercel.app/)**.
-
 ### 1. Unified Launcher (Runs Both Backend & Frontend)
 ```bash
 # Clone the repository
@@ -155,7 +155,6 @@ python src/error_diagnostics.py
 ---
 
 ## 📑 Master Documentation & Pitch Kit
-Project documentation, pitch materials, and the final presentation are available in `docs/`:
+Project documentation and pitch materials are available in `docs/`:
 1. **[Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf](docs/Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf)**: Complete P&L financial analysis, 10-slide ready-to-present PPT deck, and rapid-fire judge defense cheat sheet.
 2. **[Delhi_DISCOM_Project_Master_Technical_Report.pdf](docs/Delhi_DISCOM_Project_Master_Technical_Report.pdf)**: 5-page master technical dossier covering feature engineering, quantile LightGBM math, regime-conditioned CQR, and 52-window walk-forward validation.
-3. **[LoadIQ_no_Gamma_watermark.pptx](docs/LoadIQ_no_Gamma_watermark.pptx)**: Final LoadIQ presentation without the Gamma watermark.
