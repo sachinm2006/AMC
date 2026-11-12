@@ -88,14 +88,14 @@ function ForecastCard() {
           <defs><linearGradient id="previewBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8a9270" stopOpacity=".28" /><stop offset="100%" stopColor="#8a9270" stopOpacity=".08" /></linearGradient></defs>
           {[6200, 6800, 7400, 8000, 8400].map((value) => {
             const y = 172 - ((value - 6000) / 2500) * 160
-            return <g key={value}><line x1="45" x2="558" y1={y} y2={y} stroke="#e7dfd1" strokeDasharray="3 4" /><text x="38" y={y + 3} textAnchor="end" fill="#858477" fontSize="9">{(value / 1000).toFixed(1)}k</text></g>
+            return <g key={value}><line x1="45" x2="558" y1={y} y2={y} stroke="#e7dfd1" strokeDasharray="3 4" /><text x="38" y={y + 3} textAnchor="end" fill="#858477" fontSize="10">{(value / 1000).toFixed(1)}k</text></g>
           })}
           <path d={makeBandPath(rows)} fill="url(#previewBand)" />
           <path d={makeLinePath(rows, 'p50')} fill="none" stroke="#064e3b" strokeWidth="2.6" vectorEffect="non-scaling-stroke" />
           {rows.map((row, index) => {
             const x = 45 + (index / Math.max(1, rows.length - 1)) * 513
             const y = 172 - ((row.p50 - 6000) / 2500) * 160
-            return <g key={labels[index]}><circle cx={x} cy={y} r={index === peakIndex ? 5 : 2.2} fill={index === peakIndex ? '#b65c3c' : '#064e3b'} stroke="#fffdf7" strokeWidth="1.5" /><text x={x} y="197" textAnchor="middle" fill="#858477" fontSize="8">{labels[index]}</text></g>
+            return <g key={labels[index]}><circle cx={x} cy={y} r={index === peakIndex ? 5 : 2.2} fill={index === peakIndex ? '#b65c3c' : '#064e3b'} stroke="#fffdf7" strokeWidth="1.5" /><text x={x} y="197" textAnchor="middle" fill="#858477" fontSize="9">{labels[index]}</text></g>
           })}
         </svg>
       </div>

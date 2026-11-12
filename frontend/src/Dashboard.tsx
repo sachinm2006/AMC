@@ -310,8 +310,8 @@ function DashboardChart({ onOpenForecast, chartSeries }: { onOpenForecast: () =>
           <AreaChart data={activeSeries.map((point) => ({ ...point, spread: point.high - point.low }))} margin={{ top: 12, right: 12, left: -14, bottom: 0 }}>
             <defs><linearGradient id="dashBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7f967b" stopOpacity={0.28} /><stop offset="100%" stopColor="#7f967b" stopOpacity={0.06} /></linearGradient></defs>
             <CartesianGrid vertical={false} stroke="#e8e9e1" strokeDasharray="3 5" />
-            <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10 }} tickMargin={12} />
-            <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10 }} tickFormatter={(value: number) => `${(value / 1000).toFixed(1)}k`} />
+            <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 12 }} tickMargin={12} />
+            <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 12 }} tickFormatter={(value: number) => `${(value / 1000).toFixed(1)}k`} />
             <Tooltip content={<TooltipCard />} cursor={{ stroke: '#8d998a', strokeDasharray: '3 4' }} />
             <ReferenceLine x={horizon === '24h' ? '18' : 'Fri'} stroke="#bd7050" strokeDasharray="4 4" />
             <Area type="monotone" dataKey="low" stackId="uncertainty" stroke="none" fill="transparent" isAnimationActive={false} />
@@ -515,8 +515,8 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
           <div>
             <span className="panel-kicker">CUSTOM DATE RANGE GRAPH GENERATOR</span>
-            <h2 style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: 700 }}>Select From-Date and To-Date</h2>
-            <p style={{ margin: '2px 0 0', fontSize: '9px', color: '#64748b' }}>
+            <h2 style={{ margin: '4px 0 0', fontSize: '19px', fontWeight: 700 }}>Select From-Date and To-Date</h2>
+            <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: '#64748b' }}>
               Select any historical date (2021–2023 SLDC verified) or future horizon (Nov 2026 – Feb 2027) to generate the probabilistic graph.
             </p>
           </div>
@@ -525,23 +525,23 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px' }}>
               <Calendar size={13} style={{ color: '#0b684e' }} />
-              <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 600 }}>FROM:</span>
+              <span style={{ fontSize: '9.5px', color: '#64748b', fontWeight: 600 }}>FROM:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontSize: '9px', color: '#1e293b', fontWeight: 600 }}
+                style={{ border: 'none', background: 'transparent', fontSize: '10.5px', color: '#1e293b', fontWeight: 600 }}
               />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px' }}>
               <Calendar size={13} style={{ color: '#0b684e' }} />
-              <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 600 }}>TO:</span>
+              <span style={{ fontSize: '9.5px', color: '#64748b', fontWeight: 600 }}>TO:</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                style={{ border: 'none', background: 'transparent', fontSize: '9px', color: '#1e293b', fontWeight: 600 }}
+                style={{ border: 'none', background: 'transparent', fontSize: '10.5px', color: '#1e293b', fontWeight: 600 }}
               />
             </div>
 
@@ -557,7 +557,7 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '4px',
-                fontSize: '9px',
+                fontSize: '10.5px',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
@@ -569,28 +569,28 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
 
         {/* Quick Presets Strip */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
-          <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 700 }}>QUICK PRESETS:</span>
+          <span style={{ fontSize: '9.5px', color: '#64748b', fontWeight: 700 }}>QUICK PRESETS:</span>
           <button
             onClick={() => applyPreset('2023-05-01', '2023-05-31')}
-            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#b45309', fontWeight: 600 }}
+            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '9.5px', cursor: 'pointer', color: '#b45309', fontWeight: 600 }}
           >
             🔥 Summer Heatwave Peak (May 2023)
           </button>
           <button
             onClick={() => applyPreset('2023-01-01', '2023-01-31')}
-            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#0369a1', fontWeight: 600 }}
+            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '9.5px', cursor: 'pointer', color: '#0369a1', fontWeight: 600 }}
           >
             ❄️ Winter Heating Peak (Jan 2023)
           </button>
           <button
             onClick={() => applyPreset('2026-11-12', '2027-02-10')}
-            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#15803d', fontWeight: 600 }}
+            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '9.5px', cursor: 'pointer', color: '#15803d', fontWeight: 600 }}
           >
             🔮 3-Month Forward (Nov 2026 – Feb 2027)
           </button>
           <button
             onClick={() => applyPreset('2023-06-01', '2023-06-07')}
-            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '8px', cursor: 'pointer', color: '#475569', fontWeight: 600 }}
+            style={{ padding: '3px 9px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '9.5px', cursor: 'pointer', color: '#475569', fontWeight: 600 }}
           >
             ⚡ 7-Day Peak Window (June 2023)
           </button>
@@ -598,14 +598,14 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
 
         {/* Live Weather Strip */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', margin: '12px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '9px', color: '#334155' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', color: '#334155' }}>
             <CloudSun size={15} style={{ color: '#0b684e' }} />
             <span><strong>Live Delhi Weather Feed:</strong> {weather ? `${weather.temperature_c}°C, ${weather.condition}, Humidity: ${weather.humidity_pct}%, CDH: ${weather.cooling_degree_hours_6h}` : 'Open-Meteo Synced (27.8°C, Clear Sky)'}</span>
             <span className="passed-label" style={{ marginLeft: '6px' }}>Live Connected</span>
           </div>
           <button
             onClick={() => setShowKeyInput(!showKeyInput)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '8px', color: '#0369a1', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '9.5px', color: '#0369a1', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 600 }}
           >
             <KeyRound size={12} /> {showKeyInput ? 'Hide API Key Settings' : 'Configure Custom Weather API Key'}
           </button>
@@ -613,17 +613,17 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
 
         {showKeyInput && (
           <div style={{ padding: '10px 14px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', marginBottom: '14px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <span style={{ fontSize: '8px', color: '#475569', fontWeight: 600 }}>OpenWeatherMap API Key (Optional):</span>
+            <span style={{ fontSize: '9.5px', color: '#475569', fontWeight: 600 }}>OpenWeatherMap API Key (Optional):</span>
             <input
               type="text"
               placeholder="Paste custom key (defaults to Open-Meteo live IMD feed)"
               value={customKey}
               onChange={(e) => setCustomKey(e.target.value)}
-              style={{ flex: 1, padding: '4px 8px', fontSize: '8px', border: '1px solid #94a3b8', borderRadius: '3px' }}
+              style={{ flex: 1, padding: '4px 8px', fontSize: '9.5px', border: '1px solid #94a3b8', borderRadius: '3px' }}
             />
             <button
               onClick={() => { onUpdateApiKey(customKey); setShowKeyInput(false); }}
-              style={{ padding: '4px 10px', background: '#0b684e', color: '#fff', border: 'none', borderRadius: '3px', fontSize: '8px', cursor: 'pointer', fontWeight: 600 }}
+              style={{ padding: '4px 10px', background: '#0b684e', color: '#fff', border: 'none', borderRadius: '3px', fontSize: '9.5px', cursor: 'pointer', fontWeight: 600 }}
             >
               Apply Key
             </button>
@@ -641,8 +641,8 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="#e8e9e1" strokeDasharray="3 5" />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 9 }} tickMargin={10} interval="preserveStartEnd" />
-              <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 9 }} tickFormatter={(val: number) => `${(val / 1000).toFixed(1)}k`} />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10.5 }} tickMargin={10} interval="preserveStartEnd" />
+              <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10.5 }} tickFormatter={(val: number) => `${(val / 1000).toFixed(1)}k`} />
               <Tooltip content={({ active, payload, label }) => {
                 if (!active || !payload?.length) return null
                 const p = payload[0].payload as RangeSeriesItem
@@ -661,7 +661,7 @@ function ForecastPage({ weather, onUpdateApiKey }: { weather: WeatherData | null
                   </div>
                 )
               }} />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '9px', fontWeight: 600 }} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '10.5px', fontWeight: 600 }} />
               <Area type="monotone" dataKey="low" stackId="rangeBand" stroke="none" fill="transparent" isAnimationActive={false} legendType="none" />
               <Area type="monotone" dataKey="spread" stackId="rangeBand" stroke="none" fill="url(#rangeBand)" isAnimationActive={false} name="P10–P90 CQR Band" />
               <Line type="monotone" dataKey="mid" stroke="#064e3b" strokeWidth={2.2} dot={false} isAnimationActive={false} name="P50 Forecast" />
