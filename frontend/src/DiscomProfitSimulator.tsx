@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from './config'
 import {
   AlertTriangle,
   ShieldCheck,
@@ -88,7 +89,7 @@ export default function DiscomProfitSimulator() {
   const fetchAnalysis = async (d = discom, s = startDate, e = endDate) => {
     setLoading(true)
     try {
-      const url = `http://127.0.0.1:8000/api/discom/analysis?start_date=${s}&end_date=${e}&discom=${d}`
+      const url = `${API_BASE_URL}/api/discom/analysis?start_date=${s}&end_date=${e}&discom=${d}`
       const resp = await fetch(url)
       if (!resp.ok) {
         throw new Error(`Server returned ${resp.status}`)

@@ -10,6 +10,7 @@ import {
   Tooltip, XAxis, YAxis,
 } from 'recharts'
 import DiscomProfitSimulator from './DiscomProfitSimulator'
+import { API_BASE_URL } from './config'
 import './dashboard.css'
 
 type Tab = 'Overview' | 'Forecast' | 'Peak events' | 'Procurement' | 'Model health'
@@ -629,28 +630,28 @@ export default function Dashboard({ onBack }: { onBack: () => void }) {
 
   const fetchBackendData = (customWeatherKey?: string) => {
     // 1. Model Health
-    fetch('http://127.0.0.1:8000/api/model/health')
+    fetch(`${API_BASE_URL}/api/model/health`)
       .then((res) => res.json())
       .then((data) => setHealth(data))
       .catch((err) => console.warn('Health fetch error:', err))
 
     // 2. Live Weather
     const weatherUrl = customWeatherKey
-      ? `http://127.0.0.1:8000/api/weather/live?api_key=${encodeURIComponent(customWeatherKey)}`
-      : 'http://127.0.0.1:8000/api/weather/live'
+      ? `${API_BASE_URL}/api/weather/live?api_key=${encodeURIComponent(customWeatherKey)}`
+      : `${API_BASE_URL}/api/weather/live`
     fetch(weatherUrl)
       .then((res) => res.json())
       .then((data) => setWeather(data))
       .catch((err) => console.warn('Weather fetch error:', err))
 
     // 3. 3-Month Forward Forecast
-    fetch('http://127.0.0.1:8000/api/forecast/forward-3months?days=90')
+    fetch(`${API_BASE_URL}/api/forecast/forward-3months?days=90`)
       .then((res) => res.json())
       .then((data) => setForward3m(data))
       .catch((err) => console.warn('Forward forecast fetch error:', err))
 
     // 4. Chart series for 24h & 7d
-    fetch('http://127.0.0.1:8000/api/forecast/series?horizon=24h')
+    fetch(`${API_BASE_URL}/api/forecast/series?horizon=24h`)
       .then((res) => res.json())
       .then((data) => {
         if (data?.series?.length) {
@@ -659,7 +660,7 @@ export default function Dashboard({ onBack }: { onBack: () => void }) {
       })
       .catch((err) => console.warn('24h series fetch error:', err))
 
-    fetch('http://127.0.0.1:8000/api/forecast/series?horizon=7d')
+    fetch(`${API_BASE_URL}/api/forecast/series?horizon=7d`)
       .then((res) => res.json())
       .then((data) => {
         if (data?.series?.length) {
