@@ -155,6 +155,7 @@ python src/error_diagnostics.py
 ---
 
 ## 📑 Master Documentation & Pitch Kit
-All comprehensive documentation has been compiled into standalone, publication-grade PDFs in `docs/`:
+Project documentation, pitch materials, and the final presentation are available in `docs/`:
 1. **[Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf](docs/Delhi_DISCOM_PL_and_Pitch_Master_Guide.pdf)**: Complete P&L financial analysis, 10-slide ready-to-present PPT deck, and rapid-fire judge defense cheat sheet.
 2. **[Delhi_DISCOM_Project_Master_Technical_Report.pdf](docs/Delhi_DISCOM_Project_Master_Technical_Report.pdf)**: 5-page master technical dossier covering feature engineering, quantile LightGBM math, regime-conditioned CQR, and 52-window walk-forward validation.
+3. **[LoadIQ_no_Gamma_watermark.pptx](docs/LoadIQ_no_Gamma_watermark.pptx)**: Final LoadIQ presentation without the Gamma watermark.
