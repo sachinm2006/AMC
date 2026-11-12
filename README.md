@@ -30,6 +30,26 @@ Under **CERC DSM 2024 regulations**, under-procuring power during a severe heatw
 
 ---
 
+## 📸 Platform User Interface & Operational Snapshots
+
+| **Product Landing Page** | **Delhi SLDC Dispatch Operations Overview** |
+| :---: | :---: |
+| ![Landing Page](docs/snapshots/01_landing_page.png) | ![Operations Dashboard](docs/snapshots/02_operations_dashboard.png) |
+
+| **Probabilistic Forecast & Date Range Explorer** | **DISCOM Date-Range Profit & DSM Loss Estimator** |
+| :---: | :---: |
+| ![Forecast Explorer](docs/snapshots/03_probabilistic_forecast_explorer.png) | ![DISCOM Profit Simulator](docs/snapshots/04_discom_profit_simulator.png) |
+
+| **Grid Peak Risk & Bayesian Alert Windows** | **Regulatory Calibration (81.1% CQR) & Model Health** |
+| :---: | :---: |
+| ![Peak Risk Events](docs/snapshots/05_grid_peak_risk_events.png) | ![Model Health](docs/snapshots/06_model_health_and_audit.png) |
+
+| **End-to-End System Architecture** | **CERC 2024 DSM Asymmetric Penalty Logic** |
+| :---: | :---: |
+| ![Architecture](docs/snapshots/07_system_architecture_diagram.jpg) | ![DSM Matrix](docs/snapshots/08_cerc2024_dsm_matrix.png) |
+
+---
+
 ## 🏗️ Clean Modular Repository Architecture
 
 ```
