@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type MouseEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type MouseEvent } from 'react'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -177,6 +177,65 @@ function ProofStrip() {
   )
 }
 
+const plotBounds = { left: 78, right: 842, top: 34, bottom: 284 }
+const plotX = (index: number) => plotBounds.left + index / (dayData.length - 1) * (plotBounds.right - plotBounds.left)
+const plotY = (value: number) => plotBounds.bottom - (value - 6000) / 2500 * (plotBounds.bottom - plotBounds.top)
+const forecastLine = (field: 'p10' | 'p50' | 'p90') => dayData.map((point, index) => `${index ? 'L' : 'M'}${plotX(index).toFixed(1)},${plotY(point[field]).toFixed(1)}`).join(' ')
+const forecastBand = () => {
+  const upper = dayData.map((point, index) => `${index ? 'L' : 'M'}${plotX(index).toFixed(1)},${plotY(point.p90).toFixed(1)}`).join(' ')
+  const lower = [...dayData].reverse().map((point, reverseIndex) => {
+    const index = dayData.length - reverseIndex - 1
+    return `L${plotX(index).toFixed(1)},${plotY(point.p10).toFixed(1)}`
+  }).join(' ')
+  return `${upper} ${lower} Z`
+}
+
+function ScrollForecastGraph() {
+  const graphRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const element = graphRef.current
+    if (!element) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true)
+        observer.disconnect()
+      }
+    }, { threshold: 0.24 })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  return <div className={`forecast-graph-card ${isVisible ? 'graph-visible' : ''}`} ref={graphRef}>
+    <div className="forecast-graph-heading"><div><span>24-HOUR LOAD OUTLOOK</span><b>Demand range · MW</b></div><span className="graph-example-tag"><i />ILLUSTRATIVE DATA</span></div>
+    <div className="forecast-3d-stage" role="img" aria-label="Illustrative 24-hour load forecast. The P50 median line rises toward an evening peak around 18:00; P10 and P90 lines show a lower and upper range.">
+      <svg className="forecast-3d-plot" viewBox="0 0 900 340" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="forecastRangeFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#5a896d" stopOpacity=".28" /><stop offset="100%" stopColor="#5a896d" stopOpacity=".035" /></linearGradient>
+          <linearGradient id="medianGlow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8ba38b" /><stop offset="68%" stopColor="#064e3b" /><stop offset="100%" stopColor="#064e3b" /></linearGradient>
+        </defs>
+        {[6000, 6500, 7000, 7500, 8000, 8500].map((value) => <g key={value}>
+          <line className="graph-grid-line" x1={plotBounds.left} x2={plotBounds.right} y1={plotY(value)} y2={plotY(value)} />
+          <text className="graph-axis-label" x="62" y={plotY(value) + 4} textAnchor="end">{(value / 1000).toFixed(1)}k</text>
+        </g>)}
+        {[0, 2, 4, 6, 8].map((index) => <line key={index} className="graph-grid-line graph-grid-vertical" x1={plotX(index)} x2={plotX(index)} y1={plotBounds.top} y2={plotBounds.bottom} />)}
+        {dayData.map((point, index) => <line key={`range-${point.time}`} className="range-stem" x1={plotX(index)} x2={plotX(index)} y1={plotY(point.p90)} y2={plotY(point.p10)} />)}
+        <path className="fan-band" d={forecastBand()} />
+        <path className="quantile-edge p90-edge" d={forecastLine('p90')} pathLength="1" />
+        <path className="quantile-edge p10-edge" d={forecastLine('p10')} pathLength="1" />
+        <path className="median-curve" d={forecastLine('p50')} pathLength="1" />
+        <line className="peak-guide" x1={plotX(6)} x2={plotX(6)} y1={plotBounds.top} y2={plotBounds.bottom} />
+        {dayData.map((point, index) => <g key={`dot-${point.time}`} className={index === 6 ? 'graph-peak-point' : 'graph-data-point'}><circle cx={plotX(index)} cy={plotY(point.p50)} r={index === 6 ? 7 : 3.2} /></g>)}
+        {dayData.map((point, index) => <text key={`time-${point.time}`} className="graph-time-label" x={plotX(index)} y="316" textAnchor="middle">{point.time}</text>)}
+        <text className="graph-time-unit" x="865" y="316" textAnchor="end">HOUR</text>
+      </svg>
+      <div className="peak-float-label"><span>PEAK WINDOW</span><b>~18:00</b></div>
+    </div>
+    <div className="forecast-graph-legend"><span><i className="legend-p10" />P10 lower range</span><span><i className="legend-p50" />P50 median</span><span><i className="legend-p90" />P90 upper range</span></div>
+  </div>
+}
+
 function ForecastStory({ onOpenForecast }: { onOpenForecast: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
     <section className="forecast-story section-wrap" id="forecast-range">
@@ -188,7 +247,7 @@ function ForecastStory({ onOpenForecast }: { onOpenForecast: (event: MouseEvent<
       </div>
       <div className="quantile-demo" aria-label="Illustrative demand forecast range">
         <div className="quantile-demo-head"><span>ILLUSTRATIVE EVENING PEAK</span><span>MW · LOCAL TIME</span></div>
-        <div className="quantile-range-visual"><span className="range-track" /><span className="range-band" /><span className="range-marker marker-p10" /><span className="range-marker marker-p50" /><span className="range-marker marker-p90" /></div>
+        <ScrollForecastGraph />
         <div className="quantile-values"><div><span>P10 · LOWER</span><b>7,140 <small>MW</small></b></div><div><span>P50 · MIDDLE</span><b>7,810 <small>MW</small></b></div><div><span>P90 · HIGHER</span><b>8,320 <small>MW</small></b></div></div>
         <div className="quantile-time"><Clock3 size={14} /><span>Possible peak window</span><b>17:00–19:00</b></div>
         <p className="quantile-disclaimer">Example values only. Forecast uncertainty is part of the planning picture.</p>
