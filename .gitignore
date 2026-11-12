@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual envs
+.venv/
+env/
+venv/
+
+# Data & outputs (large files — push only sample/synthetic)
+data/raw/*.csv
+data/clean_delhi_load.parquet
+data/feature_matrix.parquet
+
+# Keep generated outputs in git (for demo)
+!outputs/phase1_summary.png
+
+# Models (large binary files)
+models/*.pkl
+models/*.json
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
