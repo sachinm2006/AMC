@@ -92,6 +92,9 @@ Probabilistic-Peak-Aware-Load-Forecasting-Procurement-Copilot/
 
 ## 🚀 How to Run on Localhost
 
+### Live Dashboard Preview
+Explore the deployed LoadIQ procurement dashboard: **[Open the live dashboard](https://probabilistic-peak-aware-load-forec.vercel.app/dashboard/procurement)**.
+
 ### 1. Unified Launcher (Runs Both Backend & Frontend)
 ```bash
 # Clone the repository
