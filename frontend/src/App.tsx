@@ -129,7 +129,7 @@ function Header({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLA
   )
 }
 
-function Hero() {
+function Hero({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
     <section className="hero" id="top">
       <div className="hero-copy">
@@ -137,7 +137,7 @@ function Hero() {
         <h1>Plan for the<br /><em>hours that matter.</em></h1>
         <p className="hero-description">A clearer view of tomorrow’s demand. Probabilistic forecasts help power teams see peak risk earlier and compare decisions with the assumptions in plain sight.</p>
         <div className="hero-actions">
-          <a className="button button-dark" href="#forecast-preview">Explore the forecast <ArrowRight size={17} /></a>
+          <a className="button button-dark" href="/dashboard/forecast" onClick={onOpenWorkspace}>Explore the forecast <ArrowRight size={17} /></a>
           <a className="button button-quiet" href="#how-it-works">See how it works <ArrowDownRight size={16} /></a>
         </div>
         <div className="hero-assurance"><ShieldCheck size={15} strokeWidth={1.7} /><span>Decision support, with uncertainty made visible.</span></div>
@@ -200,7 +200,7 @@ function Workflow() {
   )
 }
 
-function PlatformSection() {
+function PlatformSection({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
     <section className="platform-section" id="platform">
       <div className="platform-inner">
@@ -208,7 +208,7 @@ function PlatformSection() {
           <span className="eyebrow">BUILT AROUND REAL OPERATING QUESTIONS</span>
           <h2>Not just “how much?”<br /><em>“When, and how sure?”</em></h2>
           <p>Peakwise brings load forecasts, peak-event context, and procurement scenarios into one focused workspace. Each view is designed to answer a different planning question.</p>
-          <a className="light-link" href="#forecast-preview">Explore the forecast view <ArrowRight size={16} /></a>
+          <a className="light-link" href="/dashboard/forecast" onClick={onOpenWorkspace}>Explore the forecast view <ArrowRight size={16} /></a>
         </div>
         <div className="platform-details">
           <div className="detail-row"><span className="detail-label">01 / HORIZON</span><div><strong>Day-ahead to week-ahead</strong><p>Move between the next 24 hours and a broader seven-day outlook.</p></div><ArrowUpRight size={17} /></div>
@@ -254,7 +254,8 @@ export default function App() {
   }, [])
   const openDashboard = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault()
-    window.history.pushState({}, '', '/dashboard')
+    const nextPath = event.currentTarget.getAttribute('href') || '/dashboard'
+    window.history.pushState({}, '', nextPath)
     setDashboardOpen(true)
     window.scrollTo(0, 0)
   }
@@ -269,16 +270,16 @@ export default function App() {
       <div className="announcement"><span>PRODUCT PREVIEW</span> Forecast and scenario values shown are illustrative. <a href="#methodology">About this demo <ArrowRight size={13} /></a></div>
       <Header onOpenWorkspace={openDashboard} />
       <main>
-        <Hero />
+        <Hero onOpenWorkspace={openDashboard} />
         <ProofStrip />
         <Workflow />
-        <PlatformSection />
+        <PlatformSection onOpenWorkspace={openDashboard} />
         <MethodologySection />
         <section className="closing-cta">
           <span className="eyebrow">PEAKWISE · DELHI LOAD OUTLOOK</span>
           <h2>Make room for<br /><em>the unexpected.</em></h2>
           <p>Explore the forecast range and see how a peak-aware view can support tomorrow’s planning.</p>
-          <a className="button button-cream" href="#forecast-preview">View the product preview <ArrowRight size={16} /></a>
+          <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open the operations preview <ArrowRight size={16} /></a>
         </section>
       </main>
       <Footer />
