@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import {
-  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Bell, BookOpenCheck,
+  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Bell, BookOpenCheck, Building2,
   ChartNoAxesCombined, ChevronDown, ChevronLeft, ChevronRight, CircleHelp,
   Clock3, CloudSun, Download, Gauge, LayoutDashboard, Menu, Settings2,
   ShieldCheck, Sun, TriangleAlert, X, Zap,
@@ -80,7 +80,7 @@ function Sidebar({ active, onSelect, mobileOpen, collapsed, onToggleCollapsed, o
         <button className="sidebar-collapse" onClick={onToggleCollapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{collapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}</button>
         <button className="sidebar-mobile-close" onClick={onMobileClose} aria-label="Close navigation"><X size={17} /></button>
       </div>
-      <div className="workspace-switcher" title={collapsed ? 'Delhi system · Operations workspace' : undefined}><span className="workspace-icon">D</span><span className="workspace-copy"><b>Delhi system</b><small>Operations workspace</small></span><ChevronDown size={14} className="workspace-chevron" /></div>
+      <div className="workspace-switcher" title={collapsed ? 'Delhi system · Operations workspace' : undefined}><span className="workspace-icon"><Building2 size={16} /></span><span className="workspace-copy"><b>Delhi system</b><small>Operations workspace</small></span><ChevronDown size={14} className="workspace-chevron" /></div>
       <div className="nav-group-label">WORKSPACE</div>
       <nav aria-label="Workspace navigation">
         {items.slice(0, 3).map((item) => <button key={item.label} title={collapsed ? item.label : undefined} aria-current={active === item.label ? 'page' : undefined} className={`dash-nav-item ${active === item.label ? 'active' : ''}`} onClick={() => onSelect(item.label)}>{item.icon}<span>{item.label}</span>{item.label === 'Peak events' && <i className="nav-count">2</i>}</button>)}
