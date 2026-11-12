@@ -23,7 +23,7 @@ try:
     from backend.peak_analytics import analyze_peaks
     from backend.discom_service import calculate_discom_pnl_for_range, DISCOM_SHARES
     from backend.weather_service import get_live_delhi_weather
-    from backend.forecast_service import generate_forward_3months_forecast, get_real_series_for_charts
+    from backend.forecast_service import generate_forward_3months_forecast, get_real_series_for_charts, get_forecast_series_for_range
 except ImportError:
     from copilot import generate_insights
     from metrics import calculate_metrics
@@ -31,7 +31,7 @@ except ImportError:
     from peak_analytics import analyze_peaks
     from discom_service import calculate_discom_pnl_for_range, DISCOM_SHARES
     from weather_service import get_live_delhi_weather
-    from forecast_service import generate_forward_3months_forecast, get_real_series_for_charts
+    from forecast_service import generate_forward_3months_forecast, get_real_series_for_charts, get_forecast_series_for_range
 
 # ML pipeline modules
 from src.procurement import (
@@ -130,6 +130,18 @@ def get_chart_series(horizon: str = Query("24h", description="Horizon: '24h' or 
         "horizon": horizon,
         "series": get_real_series_for_charts(horizon=horizon)
     }
+
+
+@app.get("/api/forecast/range")
+def get_custom_range(
+    start_date: str = Query("2023-05-01", description="Start date (YYYY-MM-DD)"),
+    end_date: str = Query("2023-05-15", description="End date (YYYY-MM-DD)")
+):
+    """
+    Returns time series load forecast and quantile bands between user-selected from-date and to-date.
+    """
+    return get_forecast_series_for_range(start_date=start_date, end_date=end_date)
+
 
 
 # =========================================================================
