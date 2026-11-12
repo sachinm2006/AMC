@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
+from typing import Optional
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -19,11 +20,13 @@ try:
     from backend.metrics import calculate_metrics
     from backend.procurement import calculate_procurement
     from backend.peak_analytics import analyze_peaks
+    from backend.discom_service import calculate_discom_pnl_for_range, DISCOM_SHARES
 except ImportError:
     from copilot import generate_insights
     from metrics import calculate_metrics
     from procurement import calculate_procurement
     from peak_analytics import analyze_peaks
+    from discom_service import calculate_discom_pnl_for_range, DISCOM_SHARES
 
 # ML pipeline modules
 from src.procurement import (
@@ -38,9 +41,9 @@ if not DATA_PATH.exists():
 df = pd.read_csv(DATA_PATH, index_col=0)
 
 app = FastAPI(
-    title="Delhi DISCOM Load Forecasting API",
-    description="Electricity Load Forecasting and Procurement Copilot",
-    version="1.0.0"
+    title="Delhi DISCOM Load Forecasting & P&L Copilot API",
+    description="Electricity Load Forecasting, Date-Range Profit Estimation, and Procurement Copilot for BRPL, BYPL, and TPDDL",
+    version="1.1.0"
 )
 
 app.add_middleware(
@@ -63,8 +66,16 @@ def home():
     return {
         "message": "Delhi DISCOM Procurement Copilot Backend is running!",
         "status": "online",
-        "version": "1.0.0",
-        "records_loaded": len(df)
+        "version": "1.1.0",
+        "records_loaded": len(df),
+        "supported_discoms": list(DISCOM_SHARES.keys()),
+        "endpoints": [
+            "/api/forecast",
+            "/api/peaks",
+            "/api/copilot",
+            "/api/discom/shares",
+            "/api/discom/analysis"
+        ]
     }
 
 
@@ -95,6 +106,69 @@ def get_peaks():
 def peaks_analytics():
     return analyze_peaks(df)
 
+
+@app.get("/api/copilot")
+def copilot():
+    return generate_insights(df)
+
+
+# =========================================================================
+# DISCOM P&L AND DATE-RANGE PROFIT SIMULATOR ENDPOINTS
+# =========================================================================
+
+@app.get("/api/discom/shares")
+def get_discom_shares():
+    return DISCOM_SHARES
+
+
+class DiscomAnalysisInput(BaseModel):
+    start_date: str = "2023-05-01"
+    end_date: str = "2023-06-30"
+    discom: str = "ALL"
+    base_tariff: float = 4500.0
+    under_penalty: float = 3.5
+    over_cost: float = 1.0
+
+
+@app.get("/api/discom/analysis")
+def get_discom_analysis(
+    start_date: str = Query("2023-05-01", description="Start date (YYYY-MM-DD)"),
+    end_date: str = Query("2023-06-30", description="End date (YYYY-MM-DD)"),
+    discom: str = Query("ALL", description="DISCOM: ALL, BRPL, TPDDL, BYPL"),
+    base_tariff: float = Query(4500.0, description="Base tariff in INR/MWh"),
+    under_penalty: float = Query(3.5, description="DSM penalty multiplier (CERC 2024)"),
+    over_cost: float = Query(1.0, description="Surplus capacity cost multiplier")
+):
+    """
+    Evaluates DISCOM load metrics and computes estimated financial profit/savings
+    under the CERC 2024 Deviation Settlement Mechanism for any custom date range.
+    """
+    return calculate_discom_pnl_for_range(
+        start_date=start_date,
+        end_date=end_date,
+        discom=discom,
+        base_tariff=base_tariff,
+        under_penalty=under_penalty,
+        over_cost=over_cost
+    )
+
+
+@app.post("/api/discom/analysis")
+def post_discom_analysis(data: DiscomAnalysisInput):
+    """POST variant for JSON body input."""
+    return calculate_discom_pnl_for_range(
+        start_date=data.start_date,
+        end_date=data.end_date,
+        discom=data.discom,
+        base_tariff=data.base_tariff,
+        under_penalty=data.under_penalty,
+        over_cost=data.over_cost
+    )
+
+
+# =========================================================================
+# STANDARD PROCUREMENT & METRICS
+# =========================================================================
 
 class ProcurementInput(BaseModel):
     demand: float
@@ -145,8 +219,3 @@ def procurement_risk():
         "P50": calculate_procurement_loss(actual, p50),
         "P90": calculate_procurement_loss(actual, p90)
     }
-
-
-@app.get("/api/copilot")
-def copilot():
-    return generate_insights(df)
