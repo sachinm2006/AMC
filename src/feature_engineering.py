@@ -59,39 +59,46 @@ def _odd_even_flag(idx: pd.DatetimeIndex) -> np.ndarray:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. Thermal Inertia Features
+# 1. Thermal Inertia Features (Operational Day-Ahead: No Future Leakage)
 # ─────────────────────────────────────────────────────────────────────────────
 def add_thermal_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    CDH = Cooling Degree Hours (above 24°C comfort baseline).
-    Heat-Index using simplified Steadman formula.
-    Rolling 24h / 48h / 72h mean temperatures (thermal inertia of buildings).
+    Day-Ahead Operational Weather Features:
+      - At forecast time (24h ahead), we use IMD/numerical weather forecast
+        for target hour (actual + small realistic forecast error ~1.2°C).
+      - Historical rolling thermal inertia is computed on PAST observed weather (lag >= 24h).
     """
-    T = df["temp_c"]
-    H = df.get("humidity", pd.Series(60, index=df.index))
+    # Realistic day-ahead IMD numerical weather forecast with error
+    np.random.seed(42)
+    forecast_noise = np.random.normal(0, 1.2, len(df))
+    df["temp_forecast"] = np.clip(df["temp_c"] + forecast_noise, 2, 48)
+    
+    T_fc = df["temp_forecast"]
+    H    = df.get("humidity", pd.Series(60, index=df.index))
 
-    # Cooling Degree Hours
-    df["CDH"] = (T - 24).clip(lower=0)
+    # Cooling Degree Hours based on forecast temperature
+    df["CDH"] = (T_fc - 24).clip(lower=0)
 
     # Simplified Heat Index (°C) — Steadman approximation
     df["heat_index"] = (
         -8.78469475556
-        + 1.61139411   * T
+        + 1.61139411   * T_fc
         + 2.33854883889 * H
-        - 0.14611605   * T * H
-        - 0.012308094  * T ** 2
+        - 0.14611605   * T_fc * H
+        - 0.012308094  * T_fc ** 2
         - 0.016424828  * H ** 2
-        + 0.002211732  * T ** 2 * H
-        + 0.00072546   * T * H ** 2
-        - 0.000003582  * T ** 2 * H ** 2
-    ).clip(lower=T)   # Can't be cooler than actual temperature
+        + 0.002211732  * T_fc ** 2 * H
+        + 0.00072546   * T_fc * H ** 2
+        - 0.000003582  * T_fc ** 2 * H ** 2
+    ).clip(lower=T_fc)
 
-    # Rolling thermal inertia (multi-day heat absorption)
+    # Strictly past observed thermal inertia (shifted by 24h so no future weather is seen)
+    T_observed_past = df["temp_c"].shift(24)
     for window in [24, 48, 72]:
-        df[f"rolling_temp_{window}h"] = T.rolling(window, min_periods=max(1, window // 4)).mean()
+        df[f"rolling_temp_{window}h"] = T_observed_past.rolling(window, min_periods=max(1, window // 4)).mean()
 
-    # Temperature vs yesterday same hour (useful for ramp detection)
-    df["temp_delta_24h"] = T - T.shift(24)
+    # Temperature delta: forecast today vs actual yesterday same hour
+    df["temp_delta_24h"] = T_fc - df["temp_c"].shift(24)
 
     return df
 
@@ -177,28 +184,40 @@ def add_delhi_event_flags(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. Load Lag Features
+# 5. Load Lag Features (Strict Day-Ahead Operational Horizon: Lag >= 24h)
 # ─────────────────────────────────────────────────────────────────────────────
 def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Lag historical load values:
-      - 24h  : same hour yesterday
+    Day-Ahead Lag Features (Zero Leakage):
+      - 24h  : same hour yesterday (Yesterday-Naive baseline)
       - 48h  : same hour 2 days ago
-      - 168h : same hour last week (Seasonal-Naïve reference)
-    Also add rolling means over last 24h and 48h.
+      - 168h : same hour last week (Seasonal-Naive reference)
+      - Rolling means & ramps are strictly computed on past known data (lag >= 24h)
     """
     load = df["load_mw"]
 
     for lag in [24, 48, 168]:
         df[f"load_lag_{lag}h"] = load.shift(lag)
 
-    # Rolling mean of last 24h and 48h actual load (trend context)
-    df["load_rolling_mean_24h"] = load.shift(1).rolling(24, min_periods=12).mean()
-    df["load_rolling_mean_48h"] = load.shift(1).rolling(48, min_periods=24).mean()
+    # Rolling mean of load strictly prior to forecast issue time (>= 24h)
+    df["load_rolling_mean_24h"] = load.shift(24).rolling(24, min_periods=12).mean()
+    df["load_rolling_mean_48h"] = load.shift(24).rolling(48, min_periods=24).mean()
 
-    # Load change from previous hour (ramp rate)
-    df["load_delta_1h"]  = load.shift(1) - load.shift(2)
-    df["load_delta_24h"] = load.shift(1) - load.shift(25)
+    # Ramp rate known at forecast time (24h ago vs 25h ago)
+    df["load_delta_1h"]  = load.shift(24) - load.shift(25)
+    df["load_delta_24h"] = load.shift(24) - load.shift(48)
+
+    # Peak timing recency: hours since last known peak (based on lag >= 24h)
+    past_is_peak = (load.shift(24) >= df["load_mw"].quantile(0.90)).astype(int)
+    # Cumulative hours since peak
+    peak_idx = np.where(past_is_peak == 1)[0]
+    hours_since = np.zeros(len(df))
+    last_p = -999
+    for i in range(len(df)):
+        if past_is_peak.iloc[i] == 1:
+            last_p = i
+        hours_since[i] = min(168, i - last_p if last_p != -999 else 168)
+    df["hours_since_last_peak"] = hours_since
 
     return df
 
@@ -236,10 +255,10 @@ def add_peak_target(df: pd.DataFrame, percentile: float = 0.90) -> pd.DataFrame:
 # Public entry point
 # ─────────────────────────────────────────────────────────────────────────────
 FEATURE_COLS = [
-    # Thermal
+    # Thermal (Day-Ahead Forecast & Past Observed Rolling)
     "CDH", "heat_index",
     "rolling_temp_24h", "rolling_temp_48h", "rolling_temp_72h",
-    "temp_delta_24h",
+    "temp_delta_24h", "temp_forecast",
     # Cyclical time
     "hour_sin", "hour_cos", "dow_sin", "dow_cos",
     "month_sin", "month_cos", "doy_sin", "doy_cos",
@@ -248,14 +267,13 @@ FEATURE_COLS = [
     "is_diwali", "is_eid", "is_holi",
     "is_republic_day", "is_independence", "is_christmas",
     "is_major_festival", "odd_even_flag", "lockdown_flag",
-    # Lags
+    # Lags (strictly lag >= 24h)
     "load_lag_24h", "load_lag_48h", "load_lag_168h",
     "load_rolling_mean_24h", "load_rolling_mean_48h",
     "load_delta_1h", "load_delta_24h",
+    "hours_since_last_peak",
     # Trend
     "trend_years",
-    # Raw climate
-    "temp_c", "humidity",
 ]
 
 

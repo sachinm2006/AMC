@@ -29,7 +29,7 @@ models/*.json
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
+!notebooks/01_delhi_forecasting_walkthrough.ipynb
 
 # OS
 .DS_Store
