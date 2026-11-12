@@ -1,6 +1,6 @@
 # 🔋 Delhi DISCOM -- Probabilistic Peak-Aware Load Forecasting & Procurement Copilot
 
-> **🌐 Live website:** [Open LoadIQ](https://probabilistic-peak-aware-load-forec.vercel.app/)
+> **🌐 Live website:** [Open LoadIQ](https://probabilistic-peak-aware-load-forec.vercel.app/) · **📊 Presentation:** [Download LoadIQ.pptx](docs/LoadIQ.pptx)
 
 > **CodeSpark 2026** · Domain 4, PS 2 · AMC Engineering College, Dept. of CSE - Data Science  
 > **Team Lead / ML Lead:** Varun Kumar
