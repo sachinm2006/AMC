@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Bell, BookOpenCheck,
   ChartNoAxesCombined, ChevronDown, ChevronLeft, ChevronRight, CircleHelp,
@@ -12,6 +12,18 @@ import {
 import './dashboard.css'
 
 type Tab = 'Overview' | 'Forecast' | 'Peak events' | 'Procurement' | 'Model health'
+const tabPaths: Record<Tab, string> = {
+  Overview: '/dashboard',
+  Forecast: '/dashboard/forecast',
+  'Peak events': '/dashboard/peak-events',
+  Procurement: '/dashboard/procurement',
+  'Model health': '/dashboard/model-health',
+}
+
+function tabFromPath(path: string): Tab {
+  const match = Object.entries(tabPaths).find(([, route]) => route === path)
+  return (match?.[0] as Tab | undefined) ?? 'Overview'
+}
 
 const series = [
   { hour: '00', low: 6260, mid: 6500, high: 6810 },
@@ -28,6 +40,15 @@ const series = [
   { hour: '22', low: 6820, mid: 7390, high: 7930 },
   { hour: '24', low: 6540, mid: 7060, high: 7610 },
 ]
+const weekSeries = [
+  { hour: 'Mon', low: 6100, mid: 6550, high: 7120 },
+  { hour: 'Tue', low: 6230, mid: 6710, high: 7260 },
+  { hour: 'Wed', low: 6300, mid: 6900, high: 7510 },
+  { hour: 'Thu', low: 6480, mid: 7160, high: 7830 },
+  { hour: 'Fri', low: 6550, mid: 7280, high: 7980 },
+  { hour: 'Sat', low: 6350, mid: 7050, high: 7740 },
+  { hour: 'Sun', low: 6200, mid: 6800, high: 7480 },
+]
 
 function TooltipCard({ active, payload, label }: { active?: boolean; payload?: Array<{ payload: typeof series[number] }>; label?: string }) {
   if (!active || !payload?.length) return null
@@ -43,7 +64,7 @@ function MetricCard({ label, value, unit, note, icon, tone = 'normal' }: { label
   </article>
 }
 
-function Sidebar({ active, onSelect, mobileOpen, onMobileToggle, onBack }: { active: Tab; onSelect: (tab: Tab) => void; mobileOpen: boolean; onMobileToggle: () => void; onBack: () => void }) {
+function Sidebar({ active, onSelect, mobileOpen, collapsed, onToggleCollapsed, onMobileClose, onBack }: { active: Tab; onSelect: (tab: Tab) => void; mobileOpen: boolean; collapsed: boolean; onToggleCollapsed: () => void; onMobileClose: () => void; onBack: () => void }) {
   const items: Array<{ label: Tab; icon: ReactNode; section: string }> = [
     { label: 'Overview', icon: <LayoutDashboard size={17} />, section: 'WORKSPACE' },
     { label: 'Forecast', icon: <ChartNoAxesCombined size={17} />, section: 'WORKSPACE' },
@@ -52,62 +73,69 @@ function Sidebar({ active, onSelect, mobileOpen, onMobileToggle, onBack }: { act
     { label: 'Model health', icon: <ShieldCheck size={17} />, section: 'PLANNING' },
   ]
   return <>
-    {mobileOpen && <button aria-label="Close navigation" className="sidebar-scrim" onClick={onMobileToggle} />}
-    <aside className={`dash-sidebar ${mobileOpen ? 'sidebar-open' : ''}`}>
+    {mobileOpen && <button aria-label="Close navigation" className="sidebar-scrim" onClick={onMobileClose} />}
+    <aside className={`dash-sidebar ${mobileOpen ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="dash-brand-row">
-        <a className="dash-brand" href="#top" onClick={(event) => { event.preventDefault(); onSelect('Overview') }}><span className="dash-brand-symbol"><span /><span /><span /></span><span>peakwise<span className="dash-brand-dot">.</span></span></a>
-        <button className="sidebar-collapse" onClick={onMobileToggle} aria-label="Close navigation"><X size={17} /></button>
+        <button className="dash-brand" onClick={() => onSelect('Overview')} aria-label="Peakwise overview"><span className="dash-brand-symbol"><span /><span /><span /></span><span className="dash-brand-word">peakwise<span className="dash-brand-dot">.</span></span></button>
+        <button className="sidebar-collapse" onClick={onToggleCollapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{collapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}</button>
+        <button className="sidebar-mobile-close" onClick={onMobileClose} aria-label="Close navigation"><X size={17} /></button>
       </div>
-      <div className="workspace-switcher"><span className="workspace-icon">D</span><span><b>Delhi system</b><small>Operations workspace</small></span><ChevronDown size={14} /></div>
+      <div className="workspace-switcher" title={collapsed ? 'Delhi system · Operations workspace' : undefined}><span className="workspace-icon">D</span><span className="workspace-copy"><b>Delhi system</b><small>Operations workspace</small></span><ChevronDown size={14} className="workspace-chevron" /></div>
       <div className="nav-group-label">WORKSPACE</div>
       <nav aria-label="Workspace navigation">
-        {items.slice(0, 3).map((item) => <button key={item.label} className={`dash-nav-item ${active === item.label ? 'active' : ''}`} onClick={() => { onSelect(item.label); onMobileToggle() }}>{item.icon}<span>{item.label}</span>{item.label === 'Peak events' && <i className="nav-count">2</i>}</button>)}
+        {items.slice(0, 3).map((item) => <button key={item.label} title={collapsed ? item.label : undefined} aria-current={active === item.label ? 'page' : undefined} className={`dash-nav-item ${active === item.label ? 'active' : ''}`} onClick={() => onSelect(item.label)}>{item.icon}<span>{item.label}</span>{item.label === 'Peak events' && <i className="nav-count">2</i>}</button>)}
       </nav>
       <div className="nav-group-label nav-gap">PLANNING</div>
       <nav aria-label="Planning navigation">
-        {items.slice(3).map((item) => <button key={item.label} className={`dash-nav-item ${active === item.label ? 'active' : ''}`} onClick={() => { onSelect(item.label); onMobileToggle() }}>{item.icon}<span>{item.label}</span></button>)}
+        {items.slice(3).map((item) => <button key={item.label} title={collapsed ? item.label : undefined} aria-current={active === item.label ? 'page' : undefined} className={`dash-nav-item ${active === item.label ? 'active' : ''}`} onClick={() => onSelect(item.label)}>{item.icon}<span>{item.label}</span></button>)}
       </nav>
       <div className="sidebar-spacer" />
-      <div className="sidebar-source"><span className="source-icon"><BookOpenCheck size={15} /></span><span><b>Demo environment</b><small>Illustrative data only</small></span></div>
-      <button className="dash-nav-item sidebar-back" onClick={onBack}><ChevronLeft size={17} /><span>Back to Peakwise</span></button>
-      <div className="sidebar-version">PEAKWISE OPERATIONS <span>0.1 PREVIEW</span></div>
+      <div className="sidebar-source" title={collapsed ? 'Demo environment · Illustrative data only' : undefined}><span className="source-icon"><BookOpenCheck size={15} /></span><span className="source-copy"><b>Demo environment</b><small>Illustrative data only</small></span></div>
+      <button className="dash-nav-item sidebar-back" onClick={onBack} title={collapsed ? 'Back to Peakwise' : undefined}><ChevronLeft size={17} /><span>Back to Peakwise</span></button>
+      <div className="sidebar-version"><span>PEAKWISE</span><span>0.1 PREVIEW</span></div>
     </aside>
   </>
 }
 
-function DashboardChart({ onReadMore }: { onReadMore: () => void }) {
+function DashboardChart({ onOpenForecast }: { onOpenForecast: () => void }) {
+  const [horizon, setHorizon] = useState<'24h' | '7d'>('24h')
+  const activeSeries = horizon === '24h' ? series : weekSeries
+  const peakTime = horizon === '24h' ? '18:00' : 'Friday'
   return <section className="dash-panel chart-panel" id="forecast">
     <div className="panel-heading">
-      <div><span className="panel-kicker">DEMAND FORECAST</span><h2>Delhi system load</h2><p>Hourly demand outlook · Next 24 hours</p></div>
-      <button className="panel-select" onClick={onReadMore}>Next 24 hours <ChevronDown size={14} /></button>
+      <div><span className="panel-kicker">DEMAND FORECAST</span><h2>Delhi system load</h2><p>{horizon === '24h' ? 'Hourly demand outlook · Next 24 hours' : 'Daily peak outlook · Next 7 days'}</p></div>
+      <div className="horizon-toggle" role="group" aria-label="Forecast horizon">
+        <button className={horizon === '24h' ? 'selected' : ''} onClick={() => setHorizon('24h')} aria-pressed={horizon === '24h'}>24h</button>
+        <button className={horizon === '7d' ? 'selected' : ''} onClick={() => setHorizon('7d')} aria-pressed={horizon === '7d'}>7d</button>
+      </div>
     </div>
     <div className="chart-meta-row"><span><i className="chart-status-dot" />Illustrative forecast</span><span>Issued 09:00 IST · 12 Nov 2026</span></div>
-    <div className="dash-chart" role="img" aria-label="Illustrative forecast chart showing P10 to P90 demand range. Median demand peaks at 7,810 megawatts around 18:00.">
+    <div className="dash-chart" role="img" aria-label={`Illustrative forecast chart showing P10 to P90 demand range. Median demand peaks around ${peakTime}.`}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={series.map((point) => ({ ...point, spread: point.high - point.low }))} margin={{ top: 12, right: 12, left: -14, bottom: 0 }}>
+        <AreaChart data={activeSeries.map((point) => ({ ...point, spread: point.high - point.low }))} margin={{ top: 12, right: 12, left: -14, bottom: 0 }}>
           <defs><linearGradient id="dashBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7f967b" stopOpacity={0.26} /><stop offset="100%" stopColor="#7f967b" stopOpacity={0.06} /></linearGradient></defs>
           <CartesianGrid vertical={false} stroke="#e8e9e1" strokeDasharray="3 5" />
           <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10 }} tickMargin={12} />
           <YAxis domain={[6000, 8500]} axisLine={false} tickLine={false} tick={{ fill: '#858d85', fontSize: 10 }} tickFormatter={(value: number) => `${(value / 1000).toFixed(1)}k`} />
           <Tooltip content={<TooltipCard />} cursor={{ stroke: '#8d998a', strokeDasharray: '3 4' }} />
-          <ReferenceLine x="18" stroke="#bd7050" strokeDasharray="4 4" />
+          <ReferenceLine x={horizon === '24h' ? '18' : 'Fri'} stroke="#bd7050" strokeDasharray="4 4" />
           <Area type="monotone" dataKey="low" stackId="uncertainty" stroke="none" fill="transparent" isAnimationActive={false} />
           <Area type="monotone" dataKey="spread" stackId="uncertainty" stroke="none" fill="url(#dashBand)" isAnimationActive={false} />
           <Line type="monotone" dataKey="mid" stroke="#064e3b" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#064e3b', stroke: '#fffdf7', strokeWidth: 2 }} isAnimationActive={false} />
-          <Line dataKey="mid" stroke="transparent" dot={(props: { cx?: number; cy?: number; index?: number }) => props.index === 9 ? <g key="peak"><circle cx={props.cx} cy={props.cy} r="9" fill="#fffdf7" /><circle cx={props.cx} cy={props.cy} r="5" fill="#b65c3c" /></g> : <g key={`empty-${props.index}`} />} isAnimationActive={false} />
+          <Line dataKey="mid" stroke="transparent" dot={(props: { cx?: number; cy?: number; index?: number }) => props.index === (horizon === '24h' ? 9 : 4) ? <g key="peak"><circle cx={props.cx} cy={props.cy} r="9" fill="#fffdf7" /><circle cx={props.cx} cy={props.cy} r="5" fill="#b65c3c" /></g> : <g key={`empty-${props.index}`} />} isAnimationActive={false} />
         </AreaChart>
       </ResponsiveContainer>
-      <span className="peak-chart-label">Expected peak · 18:00</span>
+      <span className="peak-chart-label">Expected peak · {peakTime}</span>
     </div>
-    <div className="chart-legend-row"><span><i className="range-key" />P10–P90 range</span><span><i className="median-key" />P50 median</span><span><i className="peak-key" />Peak watch</span><button onClick={onReadMore}>Forecast details <ArrowRight size={14} /></button></div>
+    <div className="chart-legend-row"><span><i className="range-key" />P10–P90 range</span><span><i className="median-key" />P50 median</span><span><i className="peak-key" />Peak watch</span><button onClick={onOpenForecast}>Open forecast page <ArrowRight size={14} /></button></div>
     <div className="chart-disclaimer">Illustrative values for interface preview. Not an operational forecast.</div>
   </section>
 }
 
-function AppHeader({ onMenu, dark, onTheme }: { onMenu: () => void; dark: boolean; onTheme: () => void }) {
+function AppHeader({ active, onMenu, dark, onTheme }: { active: Tab; onMenu: () => void; dark: boolean; onTheme: () => void }) {
   return <header className="dash-topbar">
     <button className="mobile-menu-button" onClick={onMenu} aria-label="Open navigation"><Menu size={19} /></button>
-    <div className="topbar-breadcrumb"><span>Delhi system</span><ChevronRight size={14} /><b>Overview</b></div>
+    <div className="topbar-breadcrumb"><span>Delhi system</span><ChevronRight size={14} /><b>{active}</b></div>
     <div className="topbar-actions">
       <div className="topbar-data-status"><span className="chart-status-dot" />Demo data</div>
       <button className={`icon-action ${dark ? 'theme-on' : ''}`} onClick={onTheme} aria-label="Toggle dark mode"><Sun size={17} /></button>
@@ -168,34 +196,122 @@ function HealthPanel() {
   </section>
 }
 
+const pageCopy: Record<Tab, { title: string; description: string }> = {
+  Overview: { title: 'Good morning, operations.', description: 'Here’s the demand outlook for the Delhi system.' },
+  Forecast: { title: 'Demand forecast.', description: 'Review the expected range across the selected horizon.' },
+  'Peak events': { title: 'Peak events.', description: 'Review the hours most likely to challenge the current threshold.' },
+  Procurement: { title: 'Procurement scenarios.', description: 'Compare planning choices using clearly stated illustrative assumptions.' },
+  'Model health': { title: 'Model & data health.', description: 'Check freshness, coverage reporting, and data quality context.' },
+}
+
+function PageHeading({ active, onExport }: { active: Tab; onExport: () => void }) {
+  const copy = pageCopy[active]
+  return <div className="dash-page-title">
+    <div><div className="page-kicker"><span className="page-kicker-line" />WEDNESDAY, 12 NOVEMBER 2026</div><h1>{copy.title}</h1><p>{copy.description}</p></div>
+    <div className="title-actions"><span className="page-period"><Clock3 size={14} />Next 24 hours</span><button className="export-button" onClick={onExport}><Download size={15} />Export brief</button></div>
+  </div>
+}
+
+function PageShortcut({ icon, title, description, onClick }: { icon: ReactNode; title: string; description: string; onClick: () => void }) {
+  return <button className="page-shortcut" onClick={onClick}><span className="shortcut-icon">{icon}</span><span><b>{title}</b><small>{description}</small></span><ChevronRight size={16} /></button>
+}
+
+function ForecastTable() {
+  return <section className="dash-panel forecast-table-panel">
+    <div className="panel-heading compact"><div><span className="panel-kicker">HOURLY DETAIL</span><h2>Forecast values</h2></div><span className="table-unit">MW · IST</span></div>
+    <div className="event-table-wrap"><table className="event-table forecast-table"><thead><tr><th>TIME</th><th>P10 LOWER</th><th>P50 MEDIAN</th><th>P90 UPPER</th><th>RANGE</th></tr></thead><tbody>
+      {series.filter((_, index) => index % 2 === 0).map((point) => <tr key={point.hour}><td>{point.hour}:00</td><td>{point.low.toLocaleString()}</td><td>{point.mid.toLocaleString()}</td><td>{point.high.toLocaleString()}</td><td>{(point.high - point.low).toLocaleString()}</td></tr>)}
+    </tbody></table></div>
+    <div className="table-footnote">Illustrative hourly values. The live forecast table will use the model output contract.</div>
+  </section>
+}
+
+function OverviewPage({ onSelect }: { onSelect: (tab: Tab) => void }) {
+  return <>
+    <div className="metric-grid">
+      <MetricCard label="FORECAST PEAK" value="7,810" unit="MW" note="Expected around 18:00 IST" icon={<Zap size={16} />} />
+      <MetricCard label="PEAK LIKELIHOOD" value="68" unit="%" note="Above illustrative 7,600 MW threshold" icon={<TriangleAlert size={16} />} tone="watch" />
+      <MetricCard label="UNCERTAINTY RANGE" value="1,180" unit="MW" note="P10 to P90 at the expected peak" icon={<ChartNoAxesCombined size={16} />} />
+      <MetricCard label="WEATHER INPUT" value="38°" unit="C" note="Illustrative afternoon forecast" icon={<CloudSun size={16} />} />
+    </div>
+    <div className="dashboard-columns">
+      <DashboardChart onOpenForecast={() => onSelect('Forecast')} />
+      <PeakWatch />
+    </div>
+    <section className="overview-shortcuts">
+      <div className="shortcut-heading"><span className="panel-kicker">WORKSPACE</span><h2>Go to a planning view</h2></div>
+      <div className="shortcut-grid">
+        <PageShortcut icon={<ChartNoAxesCombined size={17} />} title="Forecast" description="Quantile bands and hourly values" onClick={() => onSelect('Forecast')} />
+        <PageShortcut icon={<TriangleAlert size={17} />} title="Peak events" description="Upcoming high-load windows" onClick={() => onSelect('Peak events')} />
+        <PageShortcut icon={<Activity size={17} />} title="Procurement" description="Compare schedule scenarios" onClick={() => onSelect('Procurement')} />
+        <PageShortcut icon={<ShieldCheck size={17} />} title="Model health" description="Freshness and backtest context" onClick={() => onSelect('Model health')} />
+      </div>
+    </section>
+  </>
+}
+
+function ForecastPage({ onSelect }: { onSelect: (tab: Tab) => void }) {
+  return <>
+    <div className="forecast-page-summary"><MetricCard label="MEDIAN PEAK" value="7,810" unit="MW" note="Around 18:00 IST" icon={<Zap size={16} />} /><MetricCard label="P10–P90 WIDTH" value="1,180" unit="MW" note="At the expected peak" icon={<ChartNoAxesCombined size={16} />} /><MetricCard label="FORECAST ISSUE" value="09:00" unit="IST" note="12 Nov 2026 · demo issue time" icon={<Clock3 size={16} />} /></div>
+    <DashboardChart onOpenForecast={() => onSelect('Forecast')} />
+    <ForecastTable />
+  </>
+}
+
+function PeakEventsPage() {
+  return <>
+    <div className="forecast-page-summary"><MetricCard label="WATCH WINDOWS" value="2" note="Within the next 24 hours" icon={<TriangleAlert size={16} />} tone="watch" /><MetricCard label="HIGHEST LIKELIHOOD" value="68" unit="%" note="Illustrative threshold: 7,600 MW" icon={<Activity size={16} />} tone="watch" /><MetricCard label="NEXT WINDOW" value="17:00" note="Today · evening peak" icon={<Clock3 size={16} />} /></div>
+    <PeakEvents />
+    <section className="dash-panel event-guidance"><span className="guidance-icon"><CircleHelp size={17} /></span><div><b>How peak events are defined</b><p>These preview alerts use an illustrative 7,600 MW threshold and sample probabilities. A live view should identify the threshold source and distinguish it from the model’s learned top-decile peak labels.</p></div></section>
+  </>
+}
+
+function ProcurementPage() {
+  return <>
+    <div className="procurement-page-grid"><ProcurementPanel /><section className="dash-panel assumption-panel"><span className="panel-kicker">COST MODEL STATUS</span><h2>Scenario assumptions</h2><p>This page currently demonstrates schedule selection and a planning buffer. It does not calculate tariff exposure or connect to an approved settlement model.</p><div className="assumption-list"><div><span>Forecast basis</span><b>P50 median · illustrative</b></div><div><span>Shortfall cost</span><b>Not configured</b></div><div><span>Surplus cost</span><b>Not configured</b></div><div><span>Output status</span><b className="status-demo">Scenario only</b></div></div><div className="health-notice"><ShieldCheck size={14} /> No procurement instruction is generated by this preview.</div></section></div>
+    <section className="dash-panel comparison-panel"><div className="panel-heading compact"><div><span className="panel-kicker">POLICY COMPARISON</span><h2>What each schedule policy means</h2></div></div><div className="policy-meaning-grid"><article><span>01</span><b>Median</b><p>Uses the central forecast as the planning reference.</p></article><article><span>02</span><b>Balanced</b><p>Adds a configurable buffer for a more cautious scenario.</p></article><article><span>03</span><b>Conservative</b><p>Explores a larger buffer; final policy should be tied to validated costs.</p></article></div></section>
+  </>
+}
+
+function ModelHealthPage() {
+  return <>
+    <div className="forecast-page-summary"><MetricCard label="FORECAST DATA" value="Demo" note="Local preview values" icon={<Download size={16} />} /><MetricCard label="LIVE CONNECTION" value="Off" note="SLDC feed not connected" icon={<Activity size={16} />} tone="watch" /><MetricCard label="COVERAGE RESULT" value="—" note="Backtest metric not loaded" icon={<Gauge size={16} />} /></div>
+    <HealthPanel />
+    <section className="dash-panel validation-panel"><span className="panel-kicker">VALIDATION CHECKLIST</span><h2>Evidence to connect before operational use</h2><div className="validation-list"><div><i className="validation-pending" /><span><b>Walk-forward results</b><small>Load aggregate and per-window backtest metrics from the pipeline.</small></span><span className="pending-label">Pending</span></div><div><i className="validation-pending" /><span><b>Interval calibration</b><small>Show empirical P10–P90 coverage by horizon and operating regime.</small></span><span className="pending-label">Pending</span></div><div><i className="validation-pending" /><span><b>Data provenance</b><small>Expose source, cadence, missing intervals, and issue timestamp.</small></span><span className="pending-label">Pending</span></div></div></section>
+  </>
+}
+
 export default function Dashboard({ onBack }: { onBack: () => void }) {
-  const [active, setActive] = useState<Tab>('Overview')
+  const [active, setActive] = useState<Tab>(() => tabFromPath(window.location.pathname))
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [dark, setDark] = useState(false)
+  useEffect(() => {
+    const syncPage = () => setActive(tabFromPath(window.location.pathname))
+    window.addEventListener('popstate', syncPage)
+    return () => window.removeEventListener('popstate', syncPage)
+  }, [])
   const selectTab = (tab: Tab) => {
     setActive(tab)
-    const target = tab === 'Overview' ? 'dash-content' : tab === 'Forecast' ? 'forecast' : tab === 'Peak events' ? 'peak-events' : tab === 'Procurement' ? 'procurement' : 'model-health'
-    document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: tab === 'Overview' ? 'start' : 'center' })
+    setMobileOpen(false)
+    if (window.location.pathname !== tabPaths[tab]) window.history.pushState({}, '', tabPaths[tab])
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  return <div className={`dashboard-app ${dark ? 'dashboard-dark' : ''}`}>
-    <Sidebar active={active} onSelect={selectTab} mobileOpen={mobileOpen} onMobileToggle={() => setMobileOpen(!mobileOpen)} onBack={onBack} />
+  const pageView = active === 'Overview' ? <OverviewPage onSelect={selectTab} />
+    : active === 'Forecast' ? <ForecastPage onSelect={selectTab} />
+      : active === 'Peak events' ? <PeakEventsPage />
+        : active === 'Procurement' ? <ProcurementPage />
+          : <ModelHealthPage />
+
+  return <div className={`dashboard-app ${dark ? 'dashboard-dark' : ''} ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''}`}>
+    <Sidebar active={active} onSelect={selectTab} mobileOpen={mobileOpen} collapsed={sidebarCollapsed} onToggleCollapsed={() => setSidebarCollapsed(!sidebarCollapsed)} onMobileClose={() => setMobileOpen(false)} onBack={onBack} />
     <div className="dash-main">
-      <AppHeader onMenu={() => setMobileOpen(true)} dark={dark} onTheme={() => setDark(!dark)} />
+      <AppHeader active={active} onMenu={() => setMobileOpen(true)} dark={dark} onTheme={() => setDark(!dark)} />
       <main className="dash-content" id="dash-content">
-        <div className="dash-page-title"><div><div className="page-kicker"><span className="page-kicker-line" />WEDNESDAY, 12 NOVEMBER 2026</div><h1>Good morning, operations.</h1><p>Here’s the demand outlook for the Delhi system.</p></div><div className="title-actions"><button className="date-select"><Clock3 size={14} />Next 24 hours<ChevronDown size={13} /></button><button className="export-button" onClick={() => window.print()}><Download size={15} />Export brief</button></div></div>
+        <PageHeading active={active} onExport={() => window.print()} />
         <div className="dashboard-context"><span className="context-badge"><i />DEMO ENVIRONMENT</span><span>Illustrative values · Not for operational use</span><span className="context-updated">Last updated 09:00 IST <ChevronRight size={13} /></span></div>
-        <div className="metric-grid">
-          <MetricCard label="FORECAST PEAK" value="7,810" unit="MW" note="Expected around 18:00 IST" icon={<Zap size={16} />} />
-          <MetricCard label="PEAK LIKELIHOOD" value="68" unit="%" note="Above illustrative 7,600 MW threshold" icon={<TriangleAlert size={16} />} tone="watch" />
-          <MetricCard label="UNCERTAINTY RANGE" value="1,180" unit="MW" note="P10 to P90 at the expected peak" icon={<ChartNoAxesCombined size={16} />} />
-          <MetricCard label="WEATHER INPUT" value="38°" unit="C" note="Illustrative afternoon forecast" icon={<CloudSun size={16} />} />
-        </div>
-        <div className="dashboard-columns">
-          <DashboardChart onReadMore={() => setActive('Forecast')} />
-          <div className="right-stack"><PeakWatch /><ProcurementPanel /></div>
-        </div>
-        <div className="dashboard-lower-grid"><PeakEvents /><HealthPanel /></div>
-        <footer className="dash-footer"><span>Peakwise operations preview</span><span>Forecast values are illustrative and not connected to live operations.</span><a href="#methodology" onClick={onBack}>Methodology <ArrowRight size={13} /></a></footer>
+        <div className="dashboard-page-content">{pageView}</div>
+        <footer className="dash-footer"><span>Peakwise operations preview</span><span>Forecast values are illustrative and not connected to live operations.</span><button onClick={onBack}>Methodology <ArrowRight size={13} /></button></footer>
       </main>
     </div>
   </div>

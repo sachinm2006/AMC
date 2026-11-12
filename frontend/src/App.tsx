@@ -246,9 +246,9 @@ function Footer() {
 }
 
 export default function App() {
-  const [dashboardOpen, setDashboardOpen] = useState(window.location.pathname === '/dashboard')
+  const [dashboardOpen, setDashboardOpen] = useState(window.location.pathname.startsWith('/dashboard'))
   useEffect(() => {
-    const syncPath = () => setDashboardOpen(window.location.pathname === '/dashboard')
+    const syncPath = () => setDashboardOpen(window.location.pathname.startsWith('/dashboard'))
     window.addEventListener('popstate', syncPath)
     return () => window.removeEventListener('popstate', syncPath)
   }, [])
