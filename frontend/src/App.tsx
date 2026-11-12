@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type MouseEvent } from 'react'
+import CopilotWidget from './CopilotWidget'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -353,7 +354,12 @@ export default function App() {
     setDashboardOpen(false)
     window.scrollTo(0, 0)
   }
-  if (dashboardOpen) return <Suspense fallback={<div className="page-loading">Loading operations workspace…</div>}><Dashboard onBack={backToLanding} /></Suspense>
+  if (dashboardOpen) return (
+    <Suspense fallback={<div className="page-loading">Loading operations workspace…</div>}>
+      <Dashboard onBack={backToLanding} />
+      <CopilotWidget />
+    </Suspense>
+  )
   return (
     <>
       <div className="announcement"><span>LOADIQ PREVIEW</span> Forecasting and schedule scenarios for Delhi power planning. <a href="#methodology">About the data <ArrowRight size={13} /></a></div>
@@ -374,6 +380,7 @@ export default function App() {
         </section>
       </main>
       <Footer />
+      <CopilotWidget />
     </>
   )
 }

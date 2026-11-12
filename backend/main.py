@@ -17,7 +17,7 @@ if str(REPO_ROOT) not in sys.path:
 
 # Backend local helper modules
 try:
-    from backend.copilot import generate_insights
+    from backend.copilot import generate_insights, answer_copilot_query
     from backend.metrics import calculate_metrics
     from backend.procurement import calculate_procurement
     from backend.peak_analytics import analyze_peaks
@@ -25,7 +25,7 @@ try:
     from backend.weather_service import get_live_delhi_weather
     from backend.forecast_service import generate_forward_3months_forecast, get_real_series_for_charts, get_forecast_series_for_range
 except ImportError:
-    from copilot import generate_insights
+    from copilot import generate_insights, answer_copilot_query
     from metrics import calculate_metrics
     from procurement import calculate_procurement
     from peak_analytics import analyze_peaks
@@ -241,3 +241,29 @@ def get_peaks():
 @app.get("/api/copilot")
 def copilot():
     return generate_insights(df)
+
+
+class CopilotChatRequest(BaseModel):
+    query: str
+    discom: Optional[str] = "BRPL"
+
+
+@app.post("/api/copilot/chat")
+def copilot_chat_post(req: CopilotChatRequest):
+    """
+    Intelligent Copilot conversational query handler.
+    Answers operational, mathematical, and regulatory questions about Delhi load forecasting.
+    """
+    return answer_copilot_query(query=req.query, discom=req.discom or "BRPL")
+
+
+@app.get("/api/copilot/chat")
+def copilot_chat_get(
+    query: str = Query(..., description="Dispatcher or judge question"),
+    discom: str = Query("BRPL", description="Target DISCOM key (BRPL, TPDDL, BYPL, ALL)")
+):
+    """
+    GET handler for Copilot chat queries.
+    """
+    return answer_copilot_query(query=query, discom=discom)
+
