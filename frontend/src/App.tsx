@@ -114,9 +114,9 @@ function Header({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLA
   const [open, setOpen] = useState(false)
   return (
     <header className="site-header">
-      <a className="brand" href="#top" aria-label="Peakwise home">
+      <a className="brand" href="#top" aria-label="LoadIQ home">
         <span className="brand-mark"><span /><span /><span /></span>
-        <span className="brand-word">peakwise<span className="brand-period">.</span></span>
+        <span className="brand-word">LoadIQ<span className="brand-period">.</span></span>
       </a>
       <button className="menu-toggle" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>{open ? <X /> : <Menu />}</button>
       <nav className={open ? 'main-nav nav-open' : 'main-nav'} aria-label="Main navigation">
@@ -144,7 +144,7 @@ function Hero({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLAnc
       </div>
       <div className="hero-product">
         <div className="product-window-bar">
-          <div className="window-brand"><span className="window-brand-mark">P</span>PEAKWISE <span className="window-separator">/</span> OPERATIONS</div>
+          <div className="window-brand"><span className="window-brand-mark">L</span>LOADIQ <span className="window-separator">/</span> OPERATIONS</div>
           <div className="window-status"><span className="status-dot" /> DEMO VIEW</div>
           <button className="window-help" aria-label="About this preview"><CircleHelp size={15} /></button>
         </div>
@@ -207,7 +207,7 @@ function PlatformSection({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEv
         <div className="platform-copy">
           <span className="eyebrow">BUILT AROUND REAL OPERATING QUESTIONS</span>
           <h2>Not just “how much?”<br /><em>“When, and how sure?”</em></h2>
-          <p>Peakwise brings load forecasts, peak-event context, and procurement scenarios into one focused workspace. Each view is designed to answer a different planning question.</p>
+          <p>LoadIQ brings load forecasts, peak-event context, and procurement scenarios into one focused workspace. Each view is designed to answer a different planning question.</p>
           <a className="light-link" href="/dashboard/forecast" onClick={onOpenWorkspace}>Explore the forecast view <ArrowRight size={16} /></a>
         </div>
         <div className="platform-details">
@@ -226,7 +226,7 @@ function MethodologySection() {
       <div className="method-topline"><span className="eyebrow">TRUST IS PART OF THE INTERFACE</span><span className="method-rule" /></div>
       <div className="method-content">
         <h2>Every forecast<br />needs its context.</h2>
-        <div className="method-copy"><p>Forecasts are useful when teams can see what went into them and how they behaved on data they had not seen before. Peakwise is designed to put freshness, coverage, and cost assumptions within reach.</p>
+        <div className="method-copy"><p>Forecasts are useful when teams can see what went into them and how they behaved on data they had not seen before. LoadIQ is designed to put freshness, coverage, and cost assumptions within reach.</p>
           <div className="method-points"><span><Check size={15} /> Time-ordered backtesting</span><span><Check size={15} /> Data freshness and gaps</span><span><Check size={15} /> Explicit scenario assumptions</span></div>
           <div className="prototype-note"><span className="note-mark">i</span><p>This early product preview uses illustrative values. It is not connected to live SLDC feeds or an approved procurement tariff model.</p></div>
         </div>
@@ -238,7 +238,7 @@ function MethodologySection() {
 function Footer() {
   return (
     <footer className="site-footer">
-      <a className="brand footer-brand" href="#top"><span className="brand-mark"><span /><span /><span /></span><span className="brand-word">peakwise<span className="brand-period">.</span></span></a>
+      <a className="brand footer-brand" href="#top"><span className="brand-mark"><span /><span /><span /></span><span className="brand-word">LoadIQ<span className="brand-period">.</span></span></a>
       <span className="footer-caption">Probabilistic load forecasting · Delhi</span>
       <a href="#top" className="back-top">Back to top <ArrowUpRight size={14} /></a>
     </footer>
@@ -276,7 +276,7 @@ export default function App() {
         <PlatformSection onOpenWorkspace={openDashboard} />
         <MethodologySection />
         <section className="closing-cta">
-          <span className="eyebrow">PEAKWISE · DELHI LOAD OUTLOOK</span>
+          <span className="eyebrow">LOADIQ · DELHI LOAD OUTLOOK</span>
           <h2>Make room for<br /><em>the unexpected.</em></h2>
           <p>Explore the forecast range and see how a peak-aware view can support tomorrow’s planning.</p>
           <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open the operations preview <ArrowRight size={16} /></a>

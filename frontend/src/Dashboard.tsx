@@ -76,7 +76,7 @@ function Sidebar({ active, onSelect, mobileOpen, collapsed, onToggleCollapsed, o
     {mobileOpen && <button aria-label="Close navigation" className="sidebar-scrim" onClick={onMobileClose} />}
     <aside className={`dash-sidebar ${mobileOpen ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="dash-brand-row">
-        <button className="dash-brand" onClick={() => onSelect('Overview')} aria-label="Peakwise overview"><span className="dash-brand-symbol"><span /><span /><span /></span><span className="dash-brand-word">peakwise<span className="dash-brand-dot">.</span></span></button>
+        <button className="dash-brand" onClick={() => onSelect('Overview')} aria-label="LoadIQ overview"><span className="dash-brand-symbol"><span /><span /><span /></span><span className="dash-brand-word">LoadIQ<span className="dash-brand-dot">.</span></span></button>
         <button className="sidebar-collapse" onClick={onToggleCollapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{collapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}</button>
         <button className="sidebar-mobile-close" onClick={onMobileClose} aria-label="Close navigation"><X size={17} /></button>
       </div>
@@ -91,8 +91,8 @@ function Sidebar({ active, onSelect, mobileOpen, collapsed, onToggleCollapsed, o
       </nav>
       <div className="sidebar-spacer" />
       <div className="sidebar-source" title={collapsed ? 'Demo environment · Illustrative data only' : undefined}><span className="source-icon"><BookOpenCheck size={15} /></span><span className="source-copy"><b>Demo environment</b><small>Illustrative data only</small></span></div>
-      <button className="dash-nav-item sidebar-back" onClick={onBack} title={collapsed ? 'Back to Peakwise' : undefined}><ChevronLeft size={17} /><span>Back to Peakwise</span></button>
-      <div className="sidebar-version"><span>PEAKWISE</span><span>0.1 PREVIEW</span></div>
+      <button className="dash-nav-item sidebar-back" onClick={onBack} title={collapsed ? 'Back to LoadIQ' : undefined}><ChevronLeft size={17} /><span>Back to LoadIQ</span></button>
+      <div className="sidebar-version"><span>LOADIQ</span><span>0.1 PREVIEW</span></div>
     </aside>
   </>
 }
@@ -311,7 +311,7 @@ export default function Dashboard({ onBack }: { onBack: () => void }) {
         <PageHeading active={active} onExport={() => window.print()} />
         <div className="dashboard-context"><span className="context-badge"><i />DEMO ENVIRONMENT</span><span>Illustrative values · Not for operational use</span><span className="context-updated">Last updated 09:00 IST <ChevronRight size={13} /></span></div>
         <div className="dashboard-page-content">{pageView}</div>
-        <footer className="dash-footer"><span>Peakwise operations preview</span><span>Forecast values are illustrative and not connected to live operations.</span><button onClick={onBack}>Methodology <ArrowRight size={13} /></button></footer>
+        <footer className="dash-footer"><span>LoadIQ operations preview</span><span>Forecast values are illustrative and not connected to live operations.</span><button onClick={onBack}>Methodology <ArrowRight size={13} /></button></footer>
       </main>
     </div>
   </div>
