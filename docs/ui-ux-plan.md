@@ -1,5 +1,9 @@
 # Peak-Aware Load Forecasting Copilot — UI/UX Plan
 
+## Visual concept
+
+[View the Peakwise concept poster](design/peakwise-visual-concept.png). It is an early visual direction board for the palette and page composition, not a final interface or live forecast.
+
 ## 1. Product experience goal
 
 Help a Delhi power-system operator move from **“What might demand look like?”** to **“What should I schedule, and what is the risk if I am wrong?”** The experience should make forecast uncertainty, peak timing, and the cost assumptions behind a recommendation visible at a glance.
@@ -220,7 +224,19 @@ The prototype should make no external API calls and should not imply that a live
 6. Connect backtest/model outputs and source metadata after the frontend schema is agreed.
 7. Replace illustrative copy with evidence-backed claims only.
 
-## 11. Open decisions to resolve during implementation
+## 11. Frontend implementation stack
+
+- **React + TypeScript + Vite:** component-based interface, type-safe forecast data contracts, and a fast development/build loop that can be served separately from the Python forecasting pipeline.
+- **Semantic HTML:** native headings, navigation, forms, buttons, tables, and landmarks for keyboard and assistive-technology support.
+- **CSS custom properties + Tailwind CSS:** central palette/spacing/type tokens with fast responsive layout utilities. Use small, intentional custom CSS for the editorial hero, chart framing, and brand-specific details; do not let utility classes replace a coherent design system.
+- **Radix UI primitives, styled as local components:** accessible dialogs, selects, tabs, tooltips, and menus with visual treatment tailored to this product.
+- **Recharts:** interactive responsive quantile and actual-load charts, custom tooltips, threshold markers, and peak annotations. Include an accessible hourly table/list as a non-chart alternative.
+- **Lucide React:** consistent lightweight interface icons.
+- **CSS transitions first:** use restrained motion for state changes; preserve reduced-motion preferences and avoid movement that obscures urgent risk information.
+
+Keep chart colors, thresholds, loading/error states, and demo-data badges in shared tokens/components. The frontend should consume a documented JSON contract so it can later connect cleanly to the Python API without coupling visual components to model internals.
+
+## 12. Open decisions to resolve during implementation
 
 - Product name and whether the app should target Delhi total load, a specific DISCOM, or both.
 - Operational peak threshold: fixed configured threshold, rolling threshold, or a separate top-decile event label.
