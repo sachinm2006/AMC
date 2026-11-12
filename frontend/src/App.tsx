@@ -80,8 +80,8 @@ function ForecastCard() {
         </div>
       </div>
       <div className="forecast-meta">
-        <span><span className="status-dot" />Operational Forecast · Delhi SLDC</span>
-        <span>Issued 09:00 IST</span>
+        <span><span className="status-dot" />Illustrative example</span>
+        <span>Sample issue · 09:00 IST</span>
       </div>
       <div className="chart-wrap" role="img" aria-label={`${range} probabilistic load forecast. Median demand peaks near 7,810 megawatts around 18:00; shaded area shows P10 to P90 uncertainty.`}>
         <svg viewBox="0 0 590 210" preserveAspectRatio="none" aria-hidden="true">
@@ -105,7 +105,7 @@ function ForecastCard() {
         <span><i className="legend-peak" />Peak watch</span>
         <button className="text-button" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>How to read this <ArrowRight size={14} /></button>
       </div>
-      <div className="chart-footnote">Delhi SLDC 3-Year Telemetry & Live Operational Inference</div>
+      <div className="chart-footnote">Sample values for the landing-page preview · Open the workspace for connected forecast data</div>
     </div>
   )
 }
@@ -131,26 +131,26 @@ function Header({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLA
 
 function Hero({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
-    <section className="hero" id="top">
+    <section className="hero hero-flow" id="top">
       <div className="hero-copy">
-        <div className="hero-kicker"><span className="kicker-rule" />POWER SYSTEM INTELLIGENCE <span className="kicker-city">DELHI, INDIA</span></div>
-        <h1>Plan for the<br /><em>hours that matter.</em></h1>
-        <p className="hero-description">A clearer view of tomorrow’s demand. Probabilistic forecasts help power teams see peak risk earlier and compare decisions with the assumptions in plain sight.</p>
+        <div className="hero-kicker"><span className="kicker-rule" />DAY-AHEAD LOAD PLANNING <span className="kicker-city">DELHI, INDIA</span></div>
+        <h1>See the peak<br /><em>before it arrives.</em></h1>
+        <p className="hero-description">See a range of possible demand, spot the hours that may matter most, and compare schedule scenarios before making a plan.</p>
         <div className="hero-actions">
-          <a className="button button-dark" href="/dashboard/forecast" onClick={onOpenWorkspace}>Explore the forecast <ArrowRight size={17} /></a>
-          <a className="button button-quiet" href="#how-it-works">See how it works <ArrowDownRight size={16} /></a>
+          <a className="button button-dark" href="/dashboard" onClick={onOpenWorkspace}>Explore the workspace <ArrowRight size={17} /></a>
+          <a className="button button-quiet" href="#how-it-works">How it works <ArrowDownRight size={16} /></a>
         </div>
-        <div className="hero-assurance"><ShieldCheck size={15} strokeWidth={1.7} /><span>Decision support, with uncertainty made visible.</span></div>
+        <div className="hero-assurance"><ShieldCheck size={15} strokeWidth={1.7} /><span>Planning support for people who make the schedule.</span></div>
       </div>
       <div className="hero-product">
         <div className="product-window-bar">
           <div className="window-brand"><span className="window-brand-mark">L</span>LOADIQ <span className="window-separator">/</span> OPERATIONS</div>
-          <div className="window-status"><span className="status-dot" /> DEMO VIEW</div>
+          <div className="window-status"><span className="status-dot" /> PRODUCT PREVIEW</div>
           <button className="window-help" aria-label="About this preview"><CircleHelp size={15} /></button>
         </div>
         <div className="product-window-content">
           <div className="product-greeting">
-            <div><span className="eyebrow">WEDNESDAY, 12 NOVEMBER</span><h2>Good morning.</h2></div>
+            <div><span className="eyebrow">NEXT-DAY OUTLOOK · EXAMPLE</span><h2>Delhi system demand</h2></div>
             <div className="region-chip"><span className="region-pulse" />Delhi system <ChevronDown size={13} /></div>
           </div>
           <div className="preview-metrics">
@@ -162,7 +162,6 @@ function Hero({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEvent<HTMLAnc
           <div className="product-window-footer"><span><i className="legend-line" />Median estimate</span><span>MW · hourly · local time</span></div>
         </div>
       </div>
-      <div className="hero-aside"><span className="aside-index">01 / 03</span><span className="aside-line" /><span>FROM FORECAST<br />TO DECISION</span></div>
     </section>
   )
 }
@@ -174,6 +173,26 @@ function ProofStrip() {
       <div className="proof-item"><span className="proof-number">01</span><div><strong>Probabilistic outlook</strong><span>P10 · P50 · P90</span></div></div>
       <div className="proof-item"><span className="proof-number">02</span><div><strong>Peak awareness</strong><span>Timing · magnitude · likelihood</span></div></div>
       <div className="proof-item"><span className="proof-number">03</span><div><strong>Scenario comparison</strong><span>Assumptions shown up front</span></div></div>
+    </section>
+  )
+}
+
+function ForecastStory({ onOpenForecast }: { onOpenForecast: (event: MouseEvent<HTMLAnchorElement>) => void }) {
+  return (
+    <section className="forecast-story section-wrap" id="forecast-range">
+      <div className="story-copy">
+        <span className="eyebrow">A RANGE, NOT A GUESS</span>
+        <h2>One forecast.<br /><em>Three useful views.</em></h2>
+        <p>A middle estimate helps with everyday planning. Lower and higher estimates show how much demand could vary around it, so staff can consider the risk before choosing a schedule.</p>
+        <a className="story-link" href="/dashboard/forecast" onClick={onOpenForecast}>Explore forecast details <ArrowRight size={15} /></a>
+      </div>
+      <div className="quantile-demo" aria-label="Illustrative demand forecast range">
+        <div className="quantile-demo-head"><span>ILLUSTRATIVE EVENING PEAK</span><span>MW · LOCAL TIME</span></div>
+        <div className="quantile-range-visual"><span className="range-track" /><span className="range-band" /><span className="range-marker marker-p10" /><span className="range-marker marker-p50" /><span className="range-marker marker-p90" /></div>
+        <div className="quantile-values"><div><span>P10 · LOWER</span><b>7,140 <small>MW</small></b></div><div><span>P50 · MIDDLE</span><b>7,810 <small>MW</small></b></div><div><span>P90 · HIGHER</span><b>8,320 <small>MW</small></b></div></div>
+        <div className="quantile-time"><Clock3 size={14} /><span>Possible peak window</span><b>17:00–19:00</b></div>
+        <p className="quantile-disclaimer">Example values only. Forecast uncertainty is part of the planning picture.</p>
+      </div>
     </section>
   )
 }
@@ -207,13 +226,13 @@ function PlatformSection({ onOpenWorkspace }: { onOpenWorkspace: (event: MouseEv
         <div className="platform-copy">
           <span className="eyebrow">BUILT AROUND REAL OPERATING QUESTIONS</span>
           <h2>Not just “how much?”<br /><em>“When, and how sure?”</em></h2>
-          <p>LoadIQ brings load forecasts, peak-event context, and procurement scenarios into one focused workspace. Each view is designed to answer a different planning question.</p>
-          <a className="light-link" href="/dashboard/forecast" onClick={onOpenWorkspace}>Explore the forecast view <ArrowRight size={16} /></a>
+          <p>LoadIQ puts demand forecasts, peak windows, and schedule scenarios in one place. Staff can see the range, review the assumptions, and keep control of the final decision.</p>
+          <a className="light-link" href="/dashboard/procurement" onClick={onOpenWorkspace}>Compare schedule scenarios <ArrowRight size={16} /></a>
         </div>
         <div className="platform-details">
-          <div className="detail-row"><span className="detail-label">01 / HORIZON</span><div><strong>Day-ahead to week-ahead</strong><p>Move between the next 24 hours and a broader seven-day outlook.</p></div><ArrowUpRight size={17} /></div>
-          <div className="detail-row"><span className="detail-label">02 / EVENT</span><div><strong>Peak timing and scale</strong><p>Put likely high-demand periods in context with the expected range.</p></div><ArrowUpRight size={17} /></div>
-          <div className="detail-row"><span className="detail-label">03 / DECISION</span><div><strong>Transparent scenarios</strong><p>Compare planning choices with editable, clearly labeled assumptions.</p></div><ArrowUpRight size={17} /></div>
+          <div className="detail-row"><span className="detail-label">01 / FORECAST</span><div><strong>Next 24 hours and beyond</strong><p>Review hourly demand ranges and a wider lookahead.</p></div><ArrowUpRight size={17} /></div>
+          <div className="detail-row"><span className="detail-label">02 / PEAK</span><div><strong>Timing and likelihood</strong><p>Bring potential high-demand windows into view.</p></div><ArrowUpRight size={17} /></div>
+          <div className="detail-row"><span className="detail-label">03 / SCENARIO</span><div><strong>Costs made visible</strong><p>Compare schedule choices against stated assumptions.</p></div><ArrowUpRight size={17} /></div>
         </div>
       </div>
     </section>
@@ -226,13 +245,24 @@ function MethodologySection() {
       <div className="method-topline"><span className="eyebrow">TRUST IS PART OF THE INTERFACE</span><span className="method-rule" /></div>
       <div className="method-content">
         <h2>Every forecast<br />needs its context.</h2>
-        <div className="method-copy"><p>Forecasts are useful when teams can see what went into them and how they behaved on data they had not seen before. LoadIQ is designed to put freshness, coverage, and cost assumptions within reach.</p>
+        <div className="method-copy"><p>Forecasts are more useful when staff can inspect their data, uncertainty, and cost assumptions. LoadIQ is designed to make those details visible alongside the planning view.</p>
           <div className="method-points"><span><Check size={15} /> Time-ordered backtesting</span><span><Check size={15} /> Data freshness and gaps</span><span><Check size={15} /> Explicit scenario assumptions</span></div>
-          <div className="prototype-note"><span className="note-mark">i</span><p>This early product preview uses illustrative values. It is not connected to live SLDC feeds or an approved procurement tariff model.</p></div>
+          <div className="prototype-note"><span className="note-mark">i</span><p>The landing-page chart is illustrative. The connected workspace uses project forecast and weather services; verify data freshness and cost assumptions before operational use.</p></div>
         </div>
       </div>
     </section>
   )
+}
+
+function QuestionsSection() {
+  return <section className="questions-section section-wrap">
+    <div className="questions-heading"><span className="eyebrow">LOADIQ, IN BRIEF</span><h2>Clear forecasts.<br /><em>Clear boundaries.</em></h2></div>
+    <div className="questions-list">
+      <details><summary>Does LoadIQ control the grid or buy power?</summary><p>No. It presents forecasts and planning scenarios. Utility staff make decisions through their existing processes.</p></details>
+      <details><summary>What do P10, P50, and P90 mean?</summary><p>They are lower, middle, and higher points in the forecast range. The range helps show uncertainty around expected demand.</p></details>
+      <details><summary>Are the numbers on this landing page live?</summary><p>No. The chart above is an illustrative example. Open the workspace to view connected project data and check its freshness label.</p></details>
+    </div>
+  </section>
 }
 
 function Footer() {
@@ -267,19 +297,21 @@ export default function App() {
   if (dashboardOpen) return <Suspense fallback={<div className="page-loading">Loading operations workspace…</div>}><Dashboard onBack={backToLanding} /></Suspense>
   return (
     <>
-      <div className="announcement"><span>LIVE TELEMETRY</span> Delhi SLDC 3-Year Dataset & Live Weather API Connected. <a href="#methodology">System Guide <ArrowRight size={13} /></a></div>
+      <div className="announcement"><span>LOADIQ PREVIEW</span> Forecasting and schedule scenarios for Delhi power planning. <a href="#methodology">About the data <ArrowRight size={13} /></a></div>
       <Header onOpenWorkspace={openDashboard} />
       <main>
         <Hero onOpenWorkspace={openDashboard} />
         <ProofStrip />
+        <ForecastStory onOpenForecast={openDashboard} />
         <Workflow />
         <PlatformSection onOpenWorkspace={openDashboard} />
         <MethodologySection />
+        <QuestionsSection />
         <section className="closing-cta">
           <span className="eyebrow">LOADIQ · DELHI LOAD OUTLOOK</span>
           <h2>Make room for<br /><em>the unexpected.</em></h2>
-          <p>Explore the forecast range and see how a peak-aware view can support tomorrow’s planning.</p>
-          <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open Operations Dashboard <ArrowRight size={16} /></a>
+          <p>Review the forecast, peak outlook, and planning scenarios in the LoadIQ workspace.</p>
+          <a className="button button-cream" href="/dashboard" onClick={openDashboard}>Open the workspace <ArrowRight size={16} /></a>
         </section>
       </main>
       <Footer />
