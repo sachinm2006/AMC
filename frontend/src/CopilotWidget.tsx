@@ -79,9 +79,9 @@ export default function CopilotWidget() {
     {
       id: 'welcome',
       sender: 'copilot',
-      model: 'Gemini 1.5 Flash Connected',
-      text: "👋 **Hello! I am LoadIQ Dispatch Copilot.**\n\nConnected to **Google Gemini 1.5 Flash**, Delhi SLDC real-time telemetry, and **CERC 2024 Deviation Settlement Mechanism (DSM)** regulations.\n\nAsk me any operational question about load forecasting, mathematical derivations, or avoided financial penalties!",
-      sources: ['Google Gemini 1.5 Flash', 'Delhi SLDC Telemetry', 'CERC 2024 DSM Rules'],
+      model: 'LoadIQ AI Dispatch Engine',
+      text: "👋 **Hello! I am LoadIQ Dispatch Copilot.**\n\nConnected to Delhi SLDC real-time telemetry, Open-Meteo live weather feeds, and **CERC 2024 Deviation Settlement Mechanism (DSM)** regulations.\n\nAsk me any operational question about load forecasting, mathematical derivations, or avoided financial penalties!",
+      sources: ['Delhi SLDC Telemetry', 'CERC 2024 DSM Rules', 'Bayesian Risk Matrix'],
       recommendedAction: 'Monitor telemetry',
       timestamp: 'Just now'
     }
@@ -129,9 +129,9 @@ export default function CopilotWidget() {
       const botMsg: Message = {
         id: `c-${Date.now()}`,
         sender: 'copilot',
-        model: data.model || 'Gemini 1.5 Flash',
+        model: data.model || 'LoadIQ AI',
         text: data.answer || "I have analyzed your query with current telemetry.",
-        sources: data.sources || ['Google Gemini 1.5 Flash', 'CERC 2024 DSM Engine'],
+        sources: data.sources || ['Delhi SLDC Telemetry', 'CERC 2024 DSM Engine'],
         recommendedAction: data.recommended_action,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
@@ -148,9 +148,9 @@ export default function CopilotWidget() {
       const botMsg: Message = {
         id: `c-${Date.now()}`,
         sender: 'copilot',
-        model: 'Gemini 1.5 Flash (Hybrid)',
+        model: 'LoadIQ AI (Active)',
         text: fallbackText,
-        sources: ['Google Gemini 1.5 Flash', 'CERC 2024 Regulations'],
+        sources: ['Delhi SLDC Telemetry', 'CERC 2024 Regulations'],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
       setMessages((prev) => [...prev, botMsg])
@@ -186,7 +186,7 @@ export default function CopilotWidget() {
       {/* Floating Cute Robot Launcher Avatar (Matching User Mockup) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Open AI Dispatch Copilot powered by Gemini 1.5 Flash"
+        aria-label="Open LoadIQ AI Dispatch Copilot"
         style={{
           position: 'fixed',
           bottom: '24px',
@@ -262,7 +262,7 @@ export default function CopilotWidget() {
                 <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                   LoadIQ Dispatch Copilot
                   <span style={{ fontSize: '8.5px', background: '#38bdf8', color: '#082f49', padding: '1.5px 6px', borderRadius: '8px', fontWeight: 800 }}>
-                    GEMINI 1.5 FLASH
+                    DISPATCH AI COPILOT
                   </span>
                 </div>
                 <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.85)' }}>
@@ -413,7 +413,7 @@ export default function CopilotWidget() {
             {loading && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#ffffff', borderRadius: '12px', width: 'fit-content', border: '1px solid #e2e8f0' }}>
                 <RobotAvatarIcon size={20} />
-                <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>Gemini 1.5 Flash analyzing telemetry & CERC rules…</span>
+                <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>Analyzing telemetry & CERC 2024 rules…</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -438,7 +438,7 @@ export default function CopilotWidget() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask Gemini copilot (e.g. 'Should we hedge tonight?')..."
+              placeholder="Ask dispatch copilot (e.g. 'Should we hedge tonight?')..."
               style={{
                 flex: 1,
                 padding: '9px 12px',

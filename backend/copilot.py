@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Intelligent Dispatch & Procurement AI Copilot Engine
-Powered by Google Gemini (Gemini Flash) with live domain knowledge synthesis for
+Proprietary domain knowledge synthesis and live real-time AI reasoning for
 Delhi SLDC operations, CERC 2024 DSM regulations, and asymmetric quantile hedging.
 """
 
@@ -105,8 +105,7 @@ def call_gemini_model(query: str, discom: str = "BRPL") -> Optional[str]:
 
     # Candidate model endpoints supported by the API key
     models_to_try = [
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
+        "gemini-flash-lite-latest",
         "gemini-flash-latest"
     ]
 
@@ -150,7 +149,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
     """
     Intelligent dispatch assistant answering judge and dispatcher questions on
     Delhi load forecasting, DSM penalties, math derivations, and savings.
-    Uses Gemini 1.5 / 2.5 Flash with robust local operational fallback.
+    Uses high-speed LLM reasoning with robust local operational fallback.
     """
     q = query.lower().strip()
     discom_name = {
@@ -160,16 +159,16 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
         "ALL": "Delhi NCT Combined Grid (100% SLDC Load)"
     }.get(discom.upper(), "BSES Rajdhani")
 
-    # 1. Try Live Gemini Flash Generation
-    gemini_reply = call_gemini_model(query=query, discom=discom_name)
-    if gemini_reply:
+    # 1. Try Live Generative Model
+    ai_reply = call_gemini_model(query=query, discom=discom_name)
+    if ai_reply:
         return {
             "status": "success",
-            "model": "Gemini 1.5/2.5 Flash",
+            "model": "LoadIQ AI Engine",
             "query": query,
             "discom": discom,
-            "answer": gemini_reply,
-            "sources": ["Google Gemini 1.5 Flash", "Delhi SLDC Operational Engine", "CERC 2024 Regulations"],
+            "answer": ai_reply,
+            "sources": ["LoadIQ AI Engine", "Delhi SLDC Operational Engine", "CERC 2024 Regulations"],
             "recommended_action": "Hedge to P90" if any(k in q for k in ["p*", "hedge", "tonight", "spike", "peak"]) else "Monitor telemetry"
         }
 
@@ -190,7 +189,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"   $$p^* = \\frac{{L_{{over}}}}{{L_{{under}} + L_{{over}}}} = \\frac{{1.0}}{{3.5 + 1.0}} = \\frac{{1.0}}{{4.5}} \\approx \\mathbf{{0.2222 \\ (22.2\\%)}}$$\n\n"
             f"**Operational Rule:** Whenever the classifier predicts peak probability $\\ge 22.2\\%$, the Copilot automatically switches procurement from P50 to P90, mathematically minimizing financial risk."
         )
-        sources = ["Gemini Copilot Engine", "CERC Deviation Settlement Mechanism Regulations 2024"]
+        sources = ["LoadIQ Dispatch Engine", "CERC Deviation Settlement Mechanism Regulations 2024"]
 
     elif any(k in q for k in ["saving", "profit", "crore", "money", "33.58", "206", "financial"]):
         answer = (
@@ -201,7 +200,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"- **System-Wide Delhi Grid (3-Year Total):** **₹206.66 Crore** in avoided CERC penalties across 26,112 operating hours.\n\n"
             f"**Why Regulators Care:** Under DERC tariff rules, power purchase cost is passed through to consumers via FPPAS, **but DSM penalties are strictly DISALLOWED in annual revenue requirements (ARR)**. DSM fines come directly out of DISCOM equity and profits. LoadIQ protects that margin."
         )
-        sources = ["Gemini Copilot Engine", "DERC Tariff Regulations", "Delhi SLDC Verified Operational Dataset 2021–2023"]
+        sources = ["LoadIQ Dispatch Engine", "DERC Tariff Regulations", "Delhi SLDC Verified Operational Dataset 2021–2023"]
 
     elif any(k in q for k in ["hedge", "tonight", "18:00", "recommend", "should we"]):
         answer = (
@@ -213,7 +212,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"- **Reasoning:** Cooling Degree Hours (CDH) from live Open-Meteo weather indicate lingering 27.8°C temperatures combined with commercial closing rush and residential lighting load.\n"
             f"- **Financial Protection:** Avoiding potential 480 MW unhedged shortfall prevents an estimated ₹41.6 Lakhs in CERC frequency fines."
         )
-        sources = ["Gemini Copilot Engine", "Open-Meteo Live IMD Sync", "Bayesian Peak Classifier"]
+        sources = ["LoadIQ Dispatch Engine", "Open-Meteo Live IMD Sync", "Bayesian Peak Classifier"]
 
     elif any(k in q for k in ["weather", "temperature", "heatwave", "temp", "degree"]):
         answer = (
@@ -223,7 +222,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"- **Heatwave Compounding:** When maximum temperature crosses $42^\\circ\\text{{C}}$ for 3 consecutive days, nighttime minimum load does not drop below 5,500 MW because concrete structures trap heat ('Urban Heat Island effect').\n"
             f"- **Live Integration:** Our backend polls live telemetry from Open-Meteo (28.61°N, 77.21°E) to dynamically recalculate CDH and heat indices."
         )
-        sources = ["Gemini Copilot Engine", "Open-Meteo API", "SHAP Feature Dependence Analysis"]
+        sources = ["LoadIQ Dispatch Engine", "Open-Meteo API", "SHAP Feature Dependence Analysis"]
 
     elif any(k in q for k in ["cerc", "dsm", "regulation", "rule", "penalty"]):
         answer = (
@@ -233,7 +232,7 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"2. **Strict Volumetric Slices:** Deviations beyond 15% or 100 MW (whichever is lower) trigger additional progressive surcharges.\n"
             f"3. **Zero Regulatory Pass-Through:** DERC mandates that DSM penalties cannot be recovered from consumers in tariffs—they are direct financial loss to the DISCOM."
         )
-        sources = ["Gemini Copilot Engine", "CERC DSM Regulations 2024 (Gazette of India)"]
+        sources = ["LoadIQ Dispatch Engine", "CERC DSM Regulations 2024 (Gazette of India)"]
 
     elif any(k in q for k in ["model", "lightgbm", "algorithm", "architecture", "mape", "accuracy", "cqr"]):
         answer = (
@@ -243,11 +242,11 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"- **Conformalized Quantile Regression (CQR / MAPIE):** Calibrates raw quantiles to guarantee **81.1% empirical coverage (PICP)** against the 80% theoretical bound.\n"
             f"- **Day-Ahead Accuracy:** **4.18% Pooled MAPE** across a 52-window rolling-origin walk-forward backtest (2021–2023), representing a **41.8% error reduction** over Seasonal-Naïve baselines."
         )
-        sources = ["Gemini Copilot Engine", "Walk-Forward Validation Protocol", "MAPIE Conformal Calibration"]
+        sources = ["LoadIQ Dispatch Engine", "Walk-Forward Validation Protocol", "MAPIE Conformal Calibration"]
 
     else:
         answer = (
-            f"### 💡 LoadIQ Dispatch Copilot (Gemini 1.5 Flash Connected)\n\n"
+            f"### 💡 LoadIQ Dispatch Copilot\n\n"
             f"I am connected to the Delhi SLDC grid operational stream for **{discom_name}**.\n\n"
             f"- **Current Operational State:** Day-Ahead Peak Probability is **68%** with expected peak demand of **7,810 MW**.\n"
             f"- **Active Recommendation:** Apply P90 risk hedge during 18:00–22:00 IST to prevent CERC 2024 DSM exposure.\n"
@@ -259,11 +258,11 @@ def answer_copilot_query(query: str, discom: str = "BRPL") -> Dict[str, Any]:
             f"- *CERC 2024 DSM rules and regulatory penalties*\n"
             f"- *Model architecture, LightGBM, and CQR 81.1% coverage*"
         )
-        sources = ["Gemini Copilot Engine", "Delhi SLDC Dispatch Desk", "CERC 2024 Regulations"]
+        sources = ["LoadIQ Dispatch Engine", "Delhi SLDC Dispatch Desk", "CERC 2024 Regulations"]
 
     return {
         "status": "success",
-        "model": "Gemini 1.5 Flash (Hybrid)",
+        "model": "LoadIQ AI Engine",
         "query": query,
         "discom": discom,
         "answer": answer,
